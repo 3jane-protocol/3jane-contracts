@@ -21,7 +21,6 @@ import {
     VaultLifecycleWithSwap
 } from "../../../libraries/VaultLifecycleWithSwap.sol";
 import {ShareMath} from "../../../libraries/ShareMath.sol";
-import {IWETH} from "../../../interfaces/IWETH.sol";
 
 contract RibbonVault is
     ReentrancyGuardUpgradeable,
@@ -81,18 +80,6 @@ contract RibbonVault is
      *  IMMUTABLES & CONSTANTS
      ***********************************************/
 
-    /// @notice WETH9 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-    address public immutable WETH;
-
-    /// @notice USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-    address public immutable USDC;
-
-    /// @notice Deprecated: 15 minute timelock between commitAndClose and rollToNexOption.
-    uint256 public constant DELAY = 0;
-
-    /// @notice 7 day period between each options sale.
-    uint256 public constant PERIOD = 7 days;
-
     // Number of weeks per year = 52.142857 weeks * FEE_MULTIPLIER = 52142857
     // Dividing by weeks per year requires doing num.mul(FEE_MULTIPLIER).div(WEEKS_PER_YEAR)
     uint256 private constant WEEKS_PER_YEAR = 52142857;
@@ -146,27 +133,19 @@ contract RibbonVault is
 
     /**
      * @notice Initializes the contract with immutable variables
-     * @param _weth is the Wrapped Ether contract
-     * @param _usdc is the USDC contract
      * @param _gammaController is the contract address for opyn actions
      * @param _marginPool is the contract address for providing collateral to opyn
      * @param _swapContract is the contract address that facilitates bids settlement
      */
     constructor(
-        address _weth,
-        address _usdc,
         address _gammaController,
         address _marginPool,
         address _swapContract
     ) {
-        require(_weth != address(0), "!_weth");
-        require(_usdc != address(0), "!_usdc");
         require(_swapContract != address(0), "!_swapContract");
         require(_gammaController != address(0), "!_gammaController");
         require(_marginPool != address(0), "!_marginPool");
 
-        WETH = _weth;
-        USDC = _usdc;
         GAMMA_CONTROLLER = _gammaController;
         MARGIN_POOL = _marginPool;
         SWAP_CONTRACT = _swapContract;
@@ -297,18 +276,6 @@ contract RibbonVault is
     /************************************************
      *  DEPOSIT & WITHDRAWALS
      ***********************************************/
-
-    /**
-     * @notice Deposits ETH into the contract and mint vault shares. Reverts if the asset is not WETH.
-     */
-    function depositETH() external payable nonReentrant {
-        require(vaultParams.asset == WETH, "!WETH");
-        require(msg.value > 0, "!value");
-
-        _depositFor(msg.value, msg.sender);
-
-        IWETH(WETH).deposit{value: msg.value}();
-    }
 
     /**
      * @notice Deposits the `asset` from msg.sender.
@@ -627,12 +594,6 @@ contract RibbonVault is
      */
     function transferAsset(address recipient, uint256 amount) internal {
         address asset = vaultParams.asset;
-        if (asset == WETH) {
-            IWETH(WETH).withdraw(amount);
-            (bool success, ) = recipient.call{value: amount}("");
-            require(success, "Transfer failed");
-            return;
-        }
         IERC20(asset).safeTransfer(recipient, amount);
     }
 
