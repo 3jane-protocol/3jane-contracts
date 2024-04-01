@@ -16,9 +16,7 @@ import {
     VaultLifecycleWithSwap
 } from "../../libraries/VaultLifecycleWithSwap.sol";
 import {ShareMath} from "../../libraries/ShareMath.sol";
-import {ILiquidityGauge} from "../../interfaces/ILiquidityGauge.sol";
 import {RibbonVault} from "./base/RibbonVault.sol";
-import {IVaultPauser} from "../../interfaces/IVaultPauser.sol";
 
 /**
  * UPGRADEABILITY: Since we use the upgradeable proxy pattern, we must observe
@@ -38,9 +36,6 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
     /// @notice oTokenFactory is the factory contract used to spawn otokens. Used to lookup otokens.
     address public immutable OTOKEN_FACTORY;
 
-    // The minimum duration for an option auction.
-    uint256 private constant MIN_AUCTION_DURATION = 5 minutes;
-
     /************************************************
      *  EVENTS
      ***********************************************/
@@ -58,11 +53,6 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
     );
 
     event NewOptionStrikeSelected(uint256 strikePrice, uint256 delta);
-
-    event AuctionDurationSet(
-        uint256 auctionDuration,
-        uint256 newAuctionDuration
-    );
 
     event InstantWithdraw(
         address indexed account,
@@ -114,21 +104,17 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
 
     /**
      * @notice Initializes the contract with immutable variables
-     * @param _weth is the Wrapped Ether contract
-     * @param _usdc is the USDC contract
      * @param _oTokenFactory is the contract address for minting new opyn option types (strikes, asset, expiry)
      * @param _gammaController is the contract address for opyn actions
      * @param _marginPool is the contract address for providing collateral to opyn
      * @param _swapContract is the contract address that facilitates bids settlement
      */
     constructor(
-        address _weth,
-        address _usdc,
         address _oTokenFactory,
         address _gammaController,
         address _marginPool,
         address _swapContract
-    ) RibbonVault(_weth, _usdc, _gammaController, _marginPool, _swapContract) {
+    ) RibbonVault(_gammaController, _marginPool, _swapContract) {
         require(_oTokenFactory != address(0), "!_oTokenFactory");
         OTOKEN_FACTORY = _oTokenFactory;
     }
@@ -205,28 +191,12 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
     }
 
     /**
-     * @notice Sets the new liquidityGauge contract for this vault
-     * @param newLiquidityGauge is the address of the new liquidityGauge contract
-     */
-    function setLiquidityGauge(address newLiquidityGauge) external onlyOwner {
-        liquidityGauge = newLiquidityGauge;
-    }
-
-    /**
      * @notice Sets oToken Premium
      * @param minPrice is the new oToken Premium in the units of 10**18
      */
     function setMinPrice(uint256 minPrice) external onlyKeeper {
         require(minPrice > 0, "!minPrice");
         currentOtokenPremium = minPrice;
-    }
-
-    /**
-     * @notice Sets the new Vault Pauser contract for this vault
-     * @param newVaultPauser is the address of the new vaultPauser contract
-     */
-    function setVaultPauser(address newVaultPauser) external onlyOwner {
-        vaultPauser = newVaultPauser;
     }
 
     /************************************************
@@ -278,23 +248,6 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
         lastQueuedWithdrawAmount = uint128(
             uint256(lastQueuedWithdrawAmount).sub(withdrawAmount)
         );
-    }
-
-    /**
-     * @notice Stakes a users vault shares
-     * @param numShares is the number of shares to stake
-     */
-    function stake(uint256 numShares) external nonReentrant {
-        address _liquidityGauge = liquidityGauge;
-        require(_liquidityGauge != address(0)); // Removed revert msgs due to contract size limit
-        require(numShares > 0);
-        uint256 heldByAccount = balanceOf(msg.sender);
-        if (heldByAccount < numShares) {
-            _redeem(numShares.sub(heldByAccount), false);
-        }
-        _transfer(msg.sender, address(this), numShares);
-        _approve(address(this), _liquidityGauge, numShares);
-        ILiquidityGauge(_liquidityGauge).deposit(numShares, msg.sender, false);
     }
 
     /**
@@ -448,21 +401,6 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
         VaultLifecycleWithSwap.burnOtokens(
             GAMMA_CONTROLLER,
             optionState.currentOption
-        );
-    }
-
-    /**
-     * @notice pause a user's vault position
-     */
-    function pausePosition() external {
-        address _vaultPauserAddress = vaultPauser;
-        require(_vaultPauserAddress != address(0)); // Removed revert msgs due to contract size limit
-        _redeem(0, true);
-        uint256 heldByAccount = balanceOf(msg.sender);
-        _approve(msg.sender, _vaultPauserAddress, heldByAccount);
-        IVaultPauser(_vaultPauserAddress).pausePosition(
-            msg.sender,
-            heldByAccount
         );
     }
 }
