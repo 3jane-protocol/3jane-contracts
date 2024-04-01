@@ -9,7 +9,6 @@ import {
 import {Vault} from "./Vault.sol";
 import {ShareMath} from "./ShareMath.sol";
 import {IStrikeSelection} from "../interfaces/IRibbon.sol";
-import {GnosisAuction} from "./GnosisAuction.sol";
 import {
     IOtokenFactory,
     IOtoken,

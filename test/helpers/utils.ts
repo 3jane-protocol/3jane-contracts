@@ -3,7 +3,6 @@ import { increaseTo } from "./time";
 import WBTC_ABI from "../../constants/abis/WBTC.json";
 import ORACLE_ABI from "../../constants/abis/OpynOracle.json";
 import CHAINLINK_PRICER_ABI from "../../constants/abis/ChainLinkPricer.json";
-import SAVAX_PRICER_ABI from "../../constants/abis/SAvaxPricer.json";
 import {
   CHAINID,
   OPTION_PROTOCOL,
@@ -740,12 +739,7 @@ export const getDeltaStep = (asset: string) => {
 };
 
 export const getPricerABI = (pricer: string) => {
-  switch (pricer) {
-    case SAVAX_PRICER:
-      return SAVAX_PRICER_ABI;
-    default:
-      return CHAINLINK_PRICER_ABI;
-  }
+  return CHAINLINK_PRICER_ABI;
 };
 
 export const getPricerAsset = async (pricer: Contract) => {
