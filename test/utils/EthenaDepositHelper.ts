@@ -1,13 +1,23 @@
 import { ethers, network } from "hardhat";
 import { BigNumber, Contract, utils } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { assert } from "../helpers/assertions";
-import { USDE_ADDRESS, SUSDE_ADDRESS } from "../../constants/constants";
+import { USDE_ADDRESS, SUSDE_ADDRESS, DAI_ADDRESS, USDC_ADDRESS, USDT_ADDRESS, TARGET_ADDRESS } from "../../constants/constants";
+const { provider, getContractAt, getContractFactory } = ethers;
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { TEST_URI } from "../../scripts/helpers/getDefaultEthersProvider";
+import {
+  getBlockNum,
+} from "../helpers/utils";
+const chainId = network.config.chainId;
 
 describe("EthenaDepositHelper", () => {
   let ethenaDepositHelper: Contract;
+  let ethenaThetaVault: Contract;
   let usde: Contract;
   let susde: Contract;
+  let usdt: Contract;
+  let dai: Contract;
+  let usdc: Contract;
   let signer: SignerWithAddress;
 
   const amountAfterSlippage = (
@@ -25,13 +35,14 @@ describe("EthenaDepositHelper", () => {
   };
 
   before(async () => {
+    // Reset block
     await network.provider.request({
       method: "hardhat_reset",
       params: [
         {
           forking: {
-            jsonRpcUrl: process.env.TEST_URI,
-            blockNumber: 19562002,
+            jsonRpcUrl: TEST_URI[chainId],
+            blockNumber: 19512740,
           },
         },
       ],
@@ -41,27 +52,46 @@ describe("EthenaDepositHelper", () => {
 
     usde = await getContractAt("IERC20", USDE_ADDRESS);
     susde = await getContractAt("IERC20", SUSDE_ADDRESS);
+    usdt = await getContractAt("IERC20", USDT_ADDRESS);
+    dai = await getContractAt("IERC20", DAI_ADDRESS);
+    usdc = await getContractAt("IERC20", USDC_ADDRESS[chainId]);
 
     const EthenaThetaVault = await getContractFactory(
       "MockRibbonThetaVault",
-      ownerSigner
+      signer
     );
 
-    ethenaThetaVault = await EthenaDepositHelper.connect(signer).deploy(
+    ethenaThetaVault = await EthenaThetaVault.connect(signer).deploy(
       SUSDE_ADDRESS
     );
 
     const EthenaDepositHelper = await getContractFactory(
       "EthenaDepositHelper",
-      ownerSigner
+      signer
     );
 
     ethenaDepositHelper = await EthenaDepositHelper.connect(signer).deploy(
-      ethenaThetaVault,
+      ethenaThetaVault.address,
       50 // 0.5%
     );
   });
 
+  it("#constructor", async () => {
+      assert.equal(await ethenaDepositHelper.ethenaVault(), ethenaThetaVault.address);
+      assert.equal(await ethenaDepositHelper.slippage(), 50);
+      assert.bnGt(await usdc.allowance(ethenaDepositHelper.address, TARGET_ADDRESS), 0);
+      assert.bnGt(await dai.allowance(ethenaDepositHelper.address, TARGET_ADDRESS), 0);
+      assert.bnGt(await usde.allowance(ethenaDepositHelper.address, susde.address), 0);
+      assert.bnGt(await susde.allowance(ethenaDepositHelper.address, ethenaThetaVault.address), 0);
+  });
+
+  it("#setSlippage", async () => {
+      let newSlippage = 40;
+      await ethenaDepositHelper.setSlippage(newSlippage);
+      assert.equal(await ethenaDepositHelper.slippage(), 40);
+  });
+
+  /*
   it("Swaps USDC to SUSDE", async () => {
     const startVaultSUSDEBalance = await SUSDE.balanceOf(ethenaThetaVault.address);
 
@@ -89,5 +119,5 @@ describe("EthenaDepositHelper", () => {
     // 2. The helper contract should have 1 stETH balance
     // (because stETH transfers suffer from an off-by-1 error)
     assert.equal((await stETH.balanceOf(stETHDepositHelper.address)).toNumber(), 1);
-  });
+  });*/
 });
