@@ -1,12 +1,15 @@
 import { ethers, network } from "hardhat";
-import { BigNumber, Contract, utils } from "ethers";
+import { BigNumber, Contract, utils, constants} from "ethers";
 import { assert } from "../helpers/assertions";
-import { USDE_ADDRESS, SUSDE_ADDRESS, DAI_ADDRESS, USDC_ADDRESS, USDT_ADDRESS, TARGET_ADDRESS } from "../../constants/constants";
+import { USDE_ADDRESS, SUSDE_ADDRESS, DAI_ADDRESS, USDC_ADDRESS, USDT_ADDRESS, TARGET_ADDRESS, USDC_OWNER_ADDRESS } from "../../constants/constants";
 const { provider, getContractAt, getContractFactory } = ethers;
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { TEST_URI } from "../../scripts/helpers/getDefaultEthersProvider";
 import {
   getBlockNum,
+  generateWallet,
+  getPermitSignature,
+  mintToken,
 } from "../helpers/utils";
 const chainId = network.config.chainId;
 
@@ -89,6 +92,33 @@ describe("EthenaDepositHelper", () => {
       let newSlippage = 40;
       await ethenaDepositHelper.setSlippage(newSlippage);
       assert.equal(await ethenaDepositHelper.slippage(), 40);
+  });
+
+  it("#depositWithPermitUSDC", async () => {
+      let depositAmount = BigNumber.from("100")
+
+      await mintToken(usdc, USDC_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+
+      console.log((await usdc.balanceOf(signer.address)).toString());
+
+      let rdmWallet: Wallet = await generateWallet(
+              usdc,
+              depositAmount,
+              signer
+            );
+
+      const { v, r, s } = await getPermitSignature(
+        rdmWallet,
+        usdc,
+        ethenaDepositHelper.address,
+        depositAmount,
+        constants.MaxUint256
+      );
+
+        const res = await ethenaDepositHelper
+     .connect(await ethers.provider.getSigner(rdmWallet.address))
+     .depositWithPermit(depositAmount, constants.MaxUint256, v, r, s);
+
   });
 
   /*

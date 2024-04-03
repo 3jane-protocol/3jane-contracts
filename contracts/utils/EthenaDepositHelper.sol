@@ -134,7 +134,7 @@ contract EthenaDepositHelper is Ownable {
       uint256 _usdeBalAdj = _usdeBal.mul(10 ** (uint256(18).sub(IERC20Detailed(address(_asset)).decimals())));
 
       // Target call must result in sufficient USDe
-      require(_usdeBal >= _amount.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE), "!_usdeBal");
+      require(_usdeBalAdj >= _amount.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE), "!_usdeBal");
 
       return _usdeBal;
     }
