@@ -773,7 +773,7 @@ library VaultLifecycleWithSwap {
         require(keeper != address(0), "!keeper");
         require(feeRecipient != address(0), "!feeRecipient");
         require(
-            period == 7 || period == 14 || period == 30 || period == 90 || period == 180,
+            period > 0,
             "!_period"
         );
         require(
