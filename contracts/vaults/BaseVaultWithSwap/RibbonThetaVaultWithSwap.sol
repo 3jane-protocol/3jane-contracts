@@ -85,11 +85,13 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
      * @param _optionsPremiumPricer is the address of the contract with the
        black-scholes premium calculation logic
      * @param _strikeSelection is the address of the contract with strike selection logic
+     * @param _period is the period between each option sales
      */
     struct InitParams {
         address _owner;
         address _keeper;
         address _feeRecipient;
+        uint256 _period;
         uint256 _managementFee;
         uint256 _performanceFee;
         string _tokenName;
@@ -132,6 +134,7 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
             _initParams._owner,
             _initParams._keeper,
             _initParams._feeRecipient,
+            _initParams._period,
             _initParams._managementFee,
             _initParams._performanceFee,
             _initParams._tokenName,
@@ -333,7 +336,8 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
                 lastStrikeOverrideRound: lastStrikeOverrideRound,
                 overriddenStrikePrice: overriddenStrikePrice,
                 strikeSelection: strikeSelection,
-                optionsPremiumPricer: optionsPremiumPricer
+                optionsPremiumPricer: optionsPremiumPricer,
+                period: period
             });
 
         (address otokenAddress, uint256 strikePrice, uint256 delta) =

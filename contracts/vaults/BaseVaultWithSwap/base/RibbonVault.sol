@@ -68,6 +68,10 @@ contract RibbonVault is
     /// @notice Management fee charged on entire AUM in rollToNextOption. Only charged when there is no loss.
     uint256 public managementFee;
 
+    /// @notice Period between each options sale.
+    /// Available options 7 (weekly), 14 (biweekly), 30 (monthly), 90 (quarterly), 180 (biannually)
+    uint256 public period;
+
     // Gap is left to avoid storage collisions. Though RibbonVault is not upgradeable, we add this as a safety measure.
     uint256[30] private ____gap;
 
@@ -158,6 +162,7 @@ contract RibbonVault is
         address _owner,
         address _keeper,
         address _feeRecipient,
+        uint256 _period,
         uint256 _managementFee,
         uint256 _performanceFee,
         string memory _tokenName,
@@ -168,6 +173,7 @@ contract RibbonVault is
             _owner,
             _keeper,
             _feeRecipient,
+            _period,
             _performanceFee,
             _managementFee,
             _tokenName,
@@ -183,10 +189,9 @@ contract RibbonVault is
         keeper = _keeper;
 
         feeRecipient = _feeRecipient;
+        period = _period;
         performanceFee = _performanceFee;
-        managementFee = _managementFee.mul(Vault.FEE_MULTIPLIER).div(
-            WEEKS_PER_YEAR
-        );
+        managementFee = _perRoundManagementFee(_managementFee);
         vaultParams = _vaultParams;
 
         uint256 assetBalance =
@@ -238,13 +243,9 @@ contract RibbonVault is
             "Invalid management fee"
         );
 
-        // We are dividing annualized management fee by num weeks in a year
-        uint256 tmpManagementFee =
-            newManagementFee.mul(Vault.FEE_MULTIPLIER).div(WEEKS_PER_YEAR);
+        managementFee = _perRoundManagementFee(newManagementFee);
 
         emit ManagementFeeSet(managementFee, newManagementFee);
-
-        managementFee = tmpManagementFee;
     }
 
     /**
@@ -315,6 +316,26 @@ contract RibbonVault is
             address(this),
             amount
         );
+    }
+
+    /**
+     * @notice Internal function to set the management fee for the vault
+     * @param _managementFee is the management fee (6 decimals). ex: 2 * 10 ** 6 = 2%
+     * @return perRoundManagementFee is the management divided by the number of rounds per year
+     */
+    function _perRoundManagementFee(uint256 _managementFee)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 _period = period;
+        uint256 feeDivider =
+            _period % 30 == 0
+                ? Vault.FEE_MULTIPLIER * (12 / (_period / 30))
+                : WEEKS_PER_YEAR / (_period / 7);
+
+        // We are dividing annualized management fee by num weeks in a year
+        return _managementFee.mul(Vault.FEE_MULTIPLIER).div(feeDivider);
     }
 
     /**
