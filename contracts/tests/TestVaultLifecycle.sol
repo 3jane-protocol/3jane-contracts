@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
-import {VaultLifecycle} from "../libraries/VaultLifecycle.sol";
+import {VaultLifecycleWithSwap} from "../libraries/VaultLifecycleWithSwap.sol";
 import {Vault} from "../libraries/Vault.sol";
 
 contract TestVaultLifecycle {
@@ -27,27 +27,12 @@ contract TestVaultLifecycle {
         vaultState.queuedWithdrawShares = newVaultState.queuedWithdrawShares;
     }
 
-    function rollover(VaultLifecycle.RolloverParams calldata params)
-        external
-        view
-        returns (
-            uint256 newLockedAmount,
-            uint256 queuedWithdrawAmount,
-            uint256 newPricePerShare,
-            uint256 mintShares,
-            uint256 performanceFeeInAsset,
-            uint256 totalVaultFee
-        )
-    {
-        return VaultLifecycle.rollover(vaultState, params);
-    }
-
     function getAuctionSettlementPrice(
         address gnosisEasyAuction,
         uint256 optionAuctionID
     ) external view returns (uint256) {
         return
-            VaultLifecycle.getAuctionSettlementPrice(
+            VaultLifecycleWithSwap.getAuctionSettlementPrice(
                 gnosisEasyAuction,
                 optionAuctionID
             );
