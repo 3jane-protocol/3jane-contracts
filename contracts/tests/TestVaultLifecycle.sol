@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
-import {VaultLifecycle} from "../libraries/VaultLifecycleWithSwap.sol";
+import {VaultLifecycleWithSwap} from "../libraries/VaultLifecycleWithSwap.sol";
 import {Vault} from "../libraries/Vault.sol";
 
 contract TestVaultLifecycle {
