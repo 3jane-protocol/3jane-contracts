@@ -12,8 +12,6 @@ import {
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IRibbonThetaVault} from "../interfaces/IRibbonThetaVault.sol";
 
-import "hardhat/console.sol";
-
 contract EthenaDepositHelper is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -28,8 +26,8 @@ contract EthenaDepositHelper is Ownable {
 
     // 100% 2dp
     uint256 private constant MAX_SLIPPAGE = 10000;
-    // 1% 2dp
-    uint256 private constant MAX_SLIPPAGE_FLOOR = 100;
+    // 3% 2dp
+    uint256 private constant MAX_SLIPPAGE_FLOOR = 300;
 
     // sUSDE options vault
     IRibbonThetaVault public immutable ethenaVault;
@@ -133,10 +131,10 @@ contract EthenaDepositHelper is Ownable {
       require(success, "!success");
 
       uint256 _usdeBal = USDE.balanceOf(address(this)).sub(_usdeBalBefore);
-      uint256 _usdeBalAdj = _usdeBal.mul(10 ** (uint256(18).sub(IERC20Detailed(address(_asset)).decimals())));
+      uint256 amountAdj = _amount.mul(10 ** (uint256(18).sub(IERC20Detailed(address(_asset)).decimals())));
 
       // Target call must result in sufficient USDe
-      require(_usdeBalAdj >= _amount.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE), "!_usdeBal");
+      require(_usdeBal >= amountAdj.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE), "!_usdeBal");
 
       return _usdeBal;
     }
