@@ -10,6 +10,7 @@ contract MockRibbonThetaVault {
     using SafeERC20 for IERC20;
 
     IERC20 public asset;
+    mapping(address => uint256) public balance;
 
     constructor(
         IERC20 _asset
@@ -23,5 +24,6 @@ contract MockRibbonThetaVault {
 
     function depositFor(uint256 _amount, address _acct) external {
       asset.safeTransferFrom(msg.sender, address(this), _amount);
+      balance[_acct] += _amount;
     }
 }

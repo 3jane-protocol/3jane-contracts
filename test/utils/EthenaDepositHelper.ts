@@ -1,7 +1,20 @@
 import { ethers, network } from "hardhat";
 import { BigNumber, Contract, utils, constants} from "ethers";
 import { assert } from "../helpers/assertions";
-import { USDE_ADDRESS, SUSDE_ADDRESS, DAI_ADDRESS, USDC_ADDRESS, USDT_ADDRESS, TARGET_ADDRESS, USDC_OWNER_ADDRESS } from "../../constants/constants";
+import { expect } from "chai";
+import {
+  USDE_ADDRESS,
+  SUSDE_ADDRESS,
+  DAI_ADDRESS,
+  USDC_ADDRESS,
+  USDT_ADDRESS,
+  SUSHI_ADDRESS,
+  TARGET_ADDRESS,
+  USDC_OWNER_ADDRESS,
+  USDE_OWNER_ADDRESS,
+  DAI_OWNER_ADDRESS,
+  USDT_OWNER_ADDRESS,
+} from "../../constants/constants";
 const { provider, getContractAt, getContractFactory } = ethers;
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { TEST_URI } from "../../scripts/helpers/getDefaultEthersProvider";
@@ -13,9 +26,13 @@ import {
   mintToken,
   approve,
 } from "../helpers/utils";
+import * as time from "../helpers/time";
+
 const chainId = network.config.chainId;
 
 describe("EthenaDepositHelper", () => {
+  time.revertToSnapshotAfterEach();
+
   let ethenaDepositHelper: Contract;
   let ethenaThetaVault: Contract;
   let usde: Contract;
@@ -23,6 +40,7 @@ describe("EthenaDepositHelper", () => {
   let usdt: Contract;
   let dai: Contract;
   let usdc: Contract;
+  let sushi: Contract;
   let signer: SignerWithAddress;
 
   const amountAfterSlippage = (
@@ -59,6 +77,7 @@ describe("EthenaDepositHelper", () => {
     susde = await getContractAt("IERC20", SUSDE_ADDRESS);
     usdt = await getContractAt("IERC20", USDT_ADDRESS);
     dai = await getContractAt("IERC20", DAI_ADDRESS);
+    sushi = await getContractAt("IERC20", SUSHI_ADDRESS[chainId]);
     usdc = await getContractAt("IERC20", USDC_ADDRESS[chainId]);
 
     const EthenaThetaVault = await getContractFactory(
@@ -90,10 +109,26 @@ describe("EthenaDepositHelper", () => {
       assert.bnGt(await susde.allowance(ethenaDepositHelper.address, ethenaThetaVault.address), 0);
   });
 
+  it("#setSlippageTooLow", async () => {
+      let newSlippage = 101;
+      await expect(
+         ethenaDepositHelper.setSlippage(newSlippage)
+      ).to.be.revertedWith("!_slippage");
+  });
+
   it("#setSlippage", async () => {
       let newSlippage = 40;
       await ethenaDepositHelper.setSlippage(newSlippage);
       assert.equal(await ethenaDepositHelper.slippage(), 40);
+  });
+
+
+  it("#depositInvalidAsset", async () => {
+      let depositAmount = BigNumber.from("100").mul(10 ** 6)
+
+       await expect(
+         ethenaDepositHelper.deposit(sushi.address, depositAmount, "0x")
+       ).to.be.revertedWith("!_asset");
   });
 
   it("#depositWithPermitUSDC", async () => {
@@ -101,7 +136,8 @@ describe("EthenaDepositHelper", () => {
 
       await mintToken(usdc, USDC_OWNER_ADDRESS[chainId], signer.address, depositAmount);
 
-      let quote = (await getQuote(chainId, usdc.address, usde.address, USDC_OWNER_ADDRESS[chainId], depositAmount, 10)).tx.data;
+      // Following call fixed at block: (await getQuote(chainId, usdc.address, usde.address, ethenaDepositHelper.address, depositAmount, 1)).tx.data;
+      let quote = "0x8770ba91000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000055b3aee03d8ddf27d2880000000000000000000003416cf6c708da44db2624d63ea0aaef7113527c6200000000000000000000000435664008f38b0650fbc1c9fc971d0a3bc2f1e478b1ccac8";
 
       let rdmWallet: Wallet = await generateWallet(
               usdc,
@@ -117,10 +153,85 @@ describe("EthenaDepositHelper", () => {
         constants.MaxUint256
       );
 
+      assert.equal(await susde.balanceOf(ethenaThetaVault.address), 0);
+
         const res = await ethenaDepositHelper
      .connect(await ethers.provider.getSigner(rdmWallet.address))
      .depositWithPermit(usdc.address, depositAmount, quote, constants.MaxUint256, v, r, s);
 
+     let out = 95890740833154663191;
+     assert.equal(await susde.balanceOf(ethenaThetaVault.address), out);
+     assert.equal(await ethenaThetaVault.balance(rdmWallet.address), out);
+  });
+
+  it("#depositWithPermitUSDE", async () => {
+      let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(18))
+
+      await mintToken(usde, USDE_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+
+      let rdmWallet: Wallet = await generateWallet(
+              usde,
+              depositAmount,
+              signer
+            );
+
+      const { v, r, s } = await getPermitSignature(
+        rdmWallet,
+        usde,
+        ethenaDepositHelper.address,
+        depositAmount,
+        constants.MaxUint256,
+        {
+          nonce: 0,
+          name: "USDe",
+          chainId: 1,
+          version: "1",
+        }
+      );
+
+      assert.equal(await susde.balanceOf(ethenaThetaVault.address), 0);
+
+        const res = await ethenaDepositHelper
+     .connect(await ethers.provider.getSigner(rdmWallet.address))
+     .depositWithPermit(usde.address, depositAmount, "0x", constants.MaxUint256, v, r, s);
+
+     let out = 96078959250706849469;
+     assert.equal(await susde.balanceOf(ethenaThetaVault.address), out);
+     assert.equal(await ethenaThetaVault.balance(rdmWallet.address), out);
+  });
+
+  it("#depositDAI", async () => {
+      let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(18))
+
+      await mintToken(dai, DAI_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+      await dai.connect(signer).approve(ethenaDepositHelper.address, depositAmount);
+
+      // Following call fixed at block: (await getQuote(chainId, dai.address, usde.address, ethenaDepositHelper.address, depositAmount, 1)).tx.data;
+      let quote = "0x8770ba910000000000000000000000006b175474e89094c44da98b954eedeac495271d0f0000000000000000000000000000000000000000000000056bc75e2d631000000000000000000000000000000000000000000000000000055b6dba782602450e28800000000000000000000048da0965ab2d2cbf1c17c09cfb5cbe67ad5b1406200000000000000000000000435664008f38b0650fbc1c9fc971d0a3bc2f1e478b1ccac8"
+
+      assert.equal(await susde.balanceOf(ethenaThetaVault.address), 0);
+
+       const res = await ethenaDepositHelper.deposit(dai.address, depositAmount, quote);
+       let out = 95894247006720711113;
+       assert.equal(await susde.balanceOf(ethenaThetaVault.address), out);
+       assert.equal(await ethenaThetaVault.balance(signer.address), out);
+  });
+
+  it("#depositUSDT", async () => {
+      let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(6))
+
+      await mintToken(usdt, USDT_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+      await usdt.connect(signer).approve(ethenaDepositHelper.address, depositAmount);
+
+      // Following call fixed at block: (await getQuote(chainId, usdt.address, usde.address, ethenaDepositHelper.address, depositAmount, 1)).tx.data;
+      let quote = "0x83800a8e000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000005f5e1000000000000000000000000000000000000000000000000055c1fdedff0ad5beb280000000000000000000000435664008f38b0650fbc1c9fc971d0a3bc2f1e478b1ccac8"
+
+      assert.equal(await susde.balanceOf(ethenaThetaVault.address), 0);
+
+      const res = await ethenaDepositHelper.deposit(usdt.address, depositAmount, quote);
+      let out = 95950352868871564882;
+      assert.equal(await susde.balanceOf(ethenaThetaVault.address), out);
+      assert.equal(await ethenaThetaVault.balance(signer.address), out);
   });
 
   /*
