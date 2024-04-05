@@ -12,11 +12,13 @@ import {
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IRibbonThetaVault} from "../interfaces/IRibbonThetaVault.sol";
 
+import "hardhat/console.sol";
+
 contract EthenaDepositHelper is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    address private constant TARGET = 0x1111111254EEB25477B68fb85Ed929f73A960582;
+    address private constant TARGET = 0x111111125421cA6dc452d289314280a0f8842A65;
     IERC20 private constant USDE = IERC20(0x4c9EDD5852cd905f086C759E8383e09bff1E68B3);
     ISUSDE private constant SUSDE = ISUSDE(0x9D39A5DE30e57443BfF2A8307A4256c8797A3497);
 

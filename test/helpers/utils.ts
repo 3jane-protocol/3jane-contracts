@@ -907,10 +907,62 @@ export async function mintToken(
     params: [contractOwner],
   });
 
-  contract.connect(tokenOwnerSigner).transfer(spender, amount);
+  await contract.connect(tokenOwnerSigner).transfer(spender, amount);
 
   await network.provider.request({
     method: "hardhat_stopImpersonatingAccount",
     params: [contractOwner],
   });
+}
+
+
+export async function approve(
+  contract: Contract,
+  approver: string,
+  spender: string,
+  amount: BigNumberish
+) {
+  const tokenOwnerSigner = await ethers.provider.getSigner(approver);
+
+  await network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [approver],
+  });
+
+  await contract.connect(tokenOwnerSigner).approve(spender, amount);
+
+  console.log("allowance");
+  console.log((await contract.allowance(approver, spender)).toString());
+  await network.provider.request({
+    method: "hardhat_stopImpersonatingAccount",
+    params: [approver],
+  });
+}
+
+export async function getQuote(chainId: number, src: string, dst: string, from: string, amount: BigNumberish, slippage: number, disableEstimate = true) {
+  const axios = require("axios");
+
+  const url = `https://api.1inch.dev/swap/v6.0/${chainId}/swap`;
+
+  const config = {
+      headers: {
+      "Authorization": `Bearer ${process.env.ONE_INCH_KEY}`
+      },
+      params: {
+          "src": src,
+          "dst": dst,
+          "amount": amount.toString(),
+          "from": from,
+          "slippage": slippage,
+          "disableEstimate": disableEstimate
+      }
+  };
+
+  try {
+    const response = await axios.get(url, config);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return nil
+  }
 }

@@ -20,4 +20,8 @@ contract MockRibbonThetaVault {
     function deposit(uint256 _amount) external {
       asset.safeTransferFrom(msg.sender, address(this), _amount);
     }
+
+    function depositFor(uint256 _amount, address _acct) external {
+      asset.safeTransferFrom(msg.sender, address(this), _amount);
+    }
 }

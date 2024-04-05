@@ -9,7 +9,9 @@ import {
   getBlockNum,
   generateWallet,
   getPermitSignature,
+  getQuote,
   mintToken,
+  approve,
 } from "../helpers/utils";
 const chainId = network.config.chainId;
 
@@ -45,7 +47,7 @@ describe("EthenaDepositHelper", () => {
         {
           forking: {
             jsonRpcUrl: TEST_URI[chainId],
-            blockNumber: 19512740,
+            blockNumber: 19572557,
           },
         },
       ],
@@ -95,11 +97,11 @@ describe("EthenaDepositHelper", () => {
   });
 
   it("#depositWithPermitUSDC", async () => {
-      let depositAmount = BigNumber.from("100")
+      let depositAmount = BigNumber.from("100").mul(10 ** 6)
 
       await mintToken(usdc, USDC_OWNER_ADDRESS[chainId], signer.address, depositAmount);
 
-      console.log((await usdc.balanceOf(signer.address)).toString());
+      let quote = (await getQuote(chainId, usdc.address, usde.address, USDC_OWNER_ADDRESS[chainId], depositAmount, 10)).tx.data;
 
       let rdmWallet: Wallet = await generateWallet(
               usdc,
@@ -117,7 +119,7 @@ describe("EthenaDepositHelper", () => {
 
         const res = await ethenaDepositHelper
      .connect(await ethers.provider.getSigner(rdmWallet.address))
-     .depositWithPermit(depositAmount, constants.MaxUint256, v, r, s);
+     .depositWithPermit(usdc.address, depositAmount, quote, constants.MaxUint256, v, r, s);
 
   });
 
