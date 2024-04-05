@@ -32,7 +32,7 @@ contract TestVaultLifecycle {
         uint256 optionAuctionID
     ) external view returns (uint256) {
         return
-            VaultLifecycle.getAuctionSettlementPrice(
+            VaultLifecycleWithSwap.getAuctionSettlementPrice(
                 gnosisEasyAuction,
                 optionAuctionID
             );
