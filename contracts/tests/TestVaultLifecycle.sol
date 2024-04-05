@@ -27,21 +27,6 @@ contract TestVaultLifecycle {
         vaultState.queuedWithdrawShares = newVaultState.queuedWithdrawShares;
     }
 
-    function rollover(VaultLifecycle.RolloverParams calldata params)
-        external
-        view
-        returns (
-            uint256 newLockedAmount,
-            uint256 queuedWithdrawAmount,
-            uint256 newPricePerShare,
-            uint256 mintShares,
-            uint256 performanceFeeInAsset,
-            uint256 totalVaultFee
-        )
-    {
-        return VaultLifecycle.rollover(vaultState, params);
-    }
-
     function getAuctionSettlementPrice(
         address gnosisEasyAuction,
         uint256 optionAuctionID
