@@ -33,6 +33,12 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
      *  IMMUTABLES & CONSTANTS
      ***********************************************/
 
+    // USDC
+    address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+
+    /// @notice Deprecated: 15 minute timelock between commitAndClose and rollToNexOption.
+    uint256 public constant DELAY = 0;
+
     /// @notice oTokenFactory is the factory contract used to spawn otokens. Used to lookup otokens.
     address public immutable OTOKEN_FACTORY;
 

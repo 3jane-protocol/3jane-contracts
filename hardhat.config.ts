@@ -56,32 +56,11 @@ export default {
         mnemonic: process.env.MAINNET_MNEMONIC,
       },
     },
-    kovan: {
-      url: process.env.KOVAN_URI,
-      chainId: 42,
-      accounts: {
-        mnemonic: process.env.KOVAN_MNEMONIC,
-      },
-    },
     goerli: {
       url: process.env.GOERLI_URI,
       chainId: 5,
       accounts: {
         mnemonic: process.env.GOERLI_MNEMONIC,
-      },
-    },
-    avax: {
-      url: process.env.AVAX_URI,
-      chainId: 43114,
-      accounts: {
-        mnemonic: process.env.AVAX_MNEMONIC,
-      },
-    },
-    fuji: {
-      url: process.env.FUJI_URI,
-      chainId: 43113,
-      accounts: {
-        mnemonic: process.env.FUJI_MNEMONIC,
       },
     },
   },
