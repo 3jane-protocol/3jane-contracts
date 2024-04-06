@@ -1,4 +1,4 @@
-# Ribbon v2
+# 3Jane
 
 Ribbon v2 is the next version for Ribbon's Theta Vault product. It brings several major improvements to the vault and makes the vault operations decentralized.
 
