@@ -772,10 +772,7 @@ library VaultLifecycleWithSwap {
         require(owner != address(0), "!owner");
         require(keeper != address(0), "!keeper");
         require(feeRecipient != address(0), "!feeRecipient");
-        require(
-            period > 0,
-            "!_period"
-        );
+        require(period > 0, "!_period");
         require(
             performanceFee < 100 * Vault.FEE_MULTIPLIER,
             "performanceFee >= 100%"
