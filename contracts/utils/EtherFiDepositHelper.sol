@@ -6,7 +6,7 @@ import {
     ILiquidityPool,
     ILiquifier,
     IWEETH
-} from "../interfaces/restaked/IEtherFi.sol";
+} from "../interfaces/restaked/IEtherfi.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {
     IERC20Permit
