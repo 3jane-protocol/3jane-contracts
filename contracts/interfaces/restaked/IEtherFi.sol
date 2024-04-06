@@ -10,11 +10,11 @@ interface IWEETH is IERC20 {
 
 interface ILiquidityPool {
     function deposit(address _referral) external payable returns (uint256);
+
     function amountForShare(uint256 _share) external view returns (uint256);
 }
 
 interface ILiquifier {
-
     struct PermitInput {
         uint256 value;
         uint256 deadline;
@@ -28,12 +28,19 @@ interface ILiquifier {
     /// @param _queuedWithdrawal The QueuedWithdrawal to be used for the deposit. This is the proof that the user has the re-staked ETH and requested the withdrawals setting the Liquifier contract as the withdrawer.
     /// @param _referral The referral address
     /// @return mintedAmount the amount of eETH minted to the caller (= msg.sender)
-    function depositWithQueuedWithdrawal(IStrategyManager.QueuedWithdrawal calldata _queuedWithdrawal, address _referral) external returns (uint256);
+    function depositWithQueuedWithdrawal(
+        IStrategyManager.QueuedWithdrawal calldata _queuedWithdrawal,
+        address _referral
+    ) external returns (uint256);
 
     /// Deposit Liquid Staking Token such as stETH and Mint eETH
     /// @param _token The address of the token to deposit
     /// @param _amount The amount of the token to deposit
     /// @param _referral The referral address
     /// @return mintedAmount the amount of eETH minted to the caller (= msg.sender)
-    function depositWithERC20(address _token, uint256 _amount, address _referral) external returns (uint256);
+    function depositWithERC20(
+        address _token,
+        uint256 _amount,
+        address _referral
+    ) external returns (uint256);
 }

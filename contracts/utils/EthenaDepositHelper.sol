@@ -4,7 +4,9 @@ pragma solidity =0.8.4;
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {ISUSDE} from "../interfaces/basis/IEthena.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
+import {
+    IERC20Permit
+} from "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import {IERC20Detailed} from "../interfaces/IERC20Detailed.sol";
 import {
     SafeERC20
@@ -16,13 +18,19 @@ contract EthenaDepositHelper is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    address private constant TARGET = 0x111111125421cA6dc452d289314280a0f8842A65;
-    IERC20 private constant USDE = IERC20(0x4c9EDD5852cd905f086C759E8383e09bff1E68B3);
-    ISUSDE private constant SUSDE = ISUSDE(0x9D39A5DE30e57443BfF2A8307A4256c8797A3497);
+    address private constant TARGET =
+        0x111111125421cA6dc452d289314280a0f8842A65;
+    IERC20 private constant USDE =
+        IERC20(0x4c9EDD5852cd905f086C759E8383e09bff1E68B3);
+    ISUSDE private constant SUSDE =
+        ISUSDE(0x9D39A5DE30e57443BfF2A8307A4256c8797A3497);
 
-    IERC20 private constant USDT = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
-    IERC20 private constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    IERC20 private constant DAI = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    IERC20 private constant USDT =
+        IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+    IERC20 private constant USDC =
+        IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 private constant DAI =
+        IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
 
     // 100% 2dp
     uint256 private constant MAX_SLIPPAGE = 10000;
@@ -40,10 +48,7 @@ contract EthenaDepositHelper is Ownable {
      * @param _ethenaVault is the contract address for sUSDe options vault
      * @param _slippage is the slippage setting for stables -> sUSDE conversion
      */
-    constructor(
-        address _ethenaVault,
-        uint256 _slippage
-    ) {
+    constructor(address _ethenaVault, uint256 _slippage) {
         require(_ethenaVault != address(0), "!_ethenaVault");
         require(_slippage <= MAX_SLIPPAGE_FLOOR, "!_slippage");
 
@@ -62,11 +67,11 @@ contract EthenaDepositHelper is Ownable {
      * @param _slippage is the new slippage with 2 dp
      */
     function setSlippage(uint256 _slippage) external onlyOwner {
-      require(_slippage <= MAX_SLIPPAGE_FLOOR, "!_slippage");
-      slippage = _slippage;
+        require(_slippage <= MAX_SLIPPAGE_FLOOR, "!_slippage");
+        slippage = _slippage;
     }
 
-     /**
+    /**
      * @notice Deposits asset without an approve
      * `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
      * over the EIP712-formatted function arguments
@@ -79,13 +84,13 @@ contract EthenaDepositHelper is Ownable {
      * @param _s is a valid signature
      */
     function depositWithPermit(
-      IERC20 _asset,
-      uint256 _amount,
-      bytes calldata _data,
-      uint256 _deadline,
-      uint8 _v,
-      bytes32 _r,
-      bytes32 _s
+        IERC20 _asset,
+        uint256 _amount,
+        bytes calldata _data,
+        uint256 _deadline,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     ) external {
         // Sign for transfer approval
         IERC20Permit(address(_asset)).permit(
@@ -98,66 +103,93 @@ contract EthenaDepositHelper is Ownable {
             _s
         );
 
-      _deposit(_asset, _amount, _data);
+        _deposit(_asset, _amount, _data);
     }
 
     /**
-    * @notice Deposits asset with approve
-    * @param _asset is the asset
-    * @param _amount is the amount of `asset` to deposit
-    * @param _data is the calldata for target contract
-    */
-    function deposit(IERC20 _asset, uint256 _amount, bytes calldata _data) external {
-      _deposit(_asset, _amount, _data);
+     * @notice Deposits asset with approve
+     * @param _asset is the asset
+     * @param _amount is the amount of `asset` to deposit
+     * @param _data is the calldata for target contract
+     */
+    function deposit(
+        IERC20 _asset,
+        uint256 _amount,
+        bytes calldata _data
+    ) external {
+        _deposit(_asset, _amount, _data);
     }
 
     /**
-    * @notice Swaps from USDC,DAI,USDT to USDe
-    * @param _asset is the asset (ex: USDC, USDT, DAI)
-    * @param _amount is the amount of `_asset` to deposit
-    * @param _data is the calldata for target contract
-    * @return amount out in USDe
-    */
-    function _swap(IERC20 _asset, uint256 _amount, bytes calldata _data) internal returns (uint256){
-      uint256 _usdeBalBefore = USDE.balanceOf(address(this));
+     * @notice Swaps from USDC,DAI,USDT to USDe
+     * @param _asset is the asset (ex: USDC, USDT, DAI)
+     * @param _amount is the amount of `_asset` to deposit
+     * @param _data is the calldata for target contract
+     * @return amount out in USDe
+     */
+    function _swap(
+        IERC20 _asset,
+        uint256 _amount,
+        bytes calldata _data
+    ) internal returns (uint256) {
+        uint256 _usdeBalBefore = USDE.balanceOf(address(this));
 
-      // Double-approve for non-compliant USDT
-      if(_asset == USDT) {
-        USDT.safeApprove(TARGET, 0);
-        USDT.safeApprove(TARGET, _amount);
-      }
+        // Double-approve for non-compliant USDT
+        if (_asset == USDT) {
+            USDT.safeApprove(TARGET, 0);
+            USDT.safeApprove(TARGET, _amount);
+        }
 
-      (bool success,) = TARGET.call(_data);
-      require(success, "!success");
+        (bool success, ) = TARGET.call(_data);
+        require(success, "!success");
 
-      uint256 _usdeBal = USDE.balanceOf(address(this)).sub(_usdeBalBefore);
-      uint256 amountAdj = _amount.mul(10 ** (uint256(18).sub(IERC20Detailed(address(_asset)).decimals())));
+        uint256 _usdeBal = USDE.balanceOf(address(this)).sub(_usdeBalBefore);
+        uint256 amountAdj =
+            _amount.mul(
+                10 **
+                    (
+                        uint256(18).sub(
+                            IERC20Detailed(address(_asset)).decimals()
+                        )
+                    )
+            );
 
-      // Target call must result in sufficient USDe
-      require(_usdeBal >= amountAdj.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE), "!_usdeBal");
+        // Target call must result in sufficient USDe
+        require(
+            _usdeBal >=
+                amountAdj.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE),
+            "!_usdeBal"
+        );
 
-      return _usdeBal;
+        return _usdeBal;
     }
 
     /**
-    * @notice Swaps, stakes for sUSDe, deposits into ethena options vault
-    * @param _asset is the asset (ex: USDC, USDT, DAI)
-    * @param _amount is the amount of `_asset` to deposit
-    * @param _data is the calldata for target contract
-    */
-    function _deposit(IERC20 _asset, uint256 _amount, bytes calldata _data) internal {
-      require(_asset == USDE || _asset == USDC || _asset == USDT || _asset == DAI, "!_asset");
+     * @notice Swaps, stakes for sUSDe, deposits into ethena options vault
+     * @param _asset is the asset (ex: USDC, USDT, DAI)
+     * @param _amount is the amount of `_asset` to deposit
+     * @param _data is the calldata for target contract
+     */
+    function _deposit(
+        IERC20 _asset,
+        uint256 _amount,
+        bytes calldata _data
+    ) internal {
+        require(
+            _asset == USDE || _asset == USDC || _asset == USDT || _asset == DAI,
+            "!_asset"
+        );
 
-      _asset.safeTransferFrom(msg.sender, address(this), _amount);
+        _asset.safeTransferFrom(msg.sender, address(this), _amount);
 
-      // If not USDE then swap for USDE
-      if (_asset != USDE) {
-        _amount = _swap(_asset, _amount, _data);
-      }
+        // If not USDE then swap for USDE
+        if (_asset != USDE) {
+            _amount = _swap(_asset, _amount, _data);
+        }
 
-      // Stake USDE for sUSDE
-      uint256 _susdeAmt = SUSDE.deposit(_amount, address(this));
-      // Deposit sUSDE into ethena options vault
-      ethenaVault.depositFor(_susdeAmt, msg.sender);
+        // Stake USDE for sUSDE
+        uint256 _susdeAmt = SUSDE.deposit(_amount, address(this));
+        // Deposit sUSDE into ethena options vault
+        ethenaVault.depositFor(_susdeAmt, msg.sender);
     }
 }

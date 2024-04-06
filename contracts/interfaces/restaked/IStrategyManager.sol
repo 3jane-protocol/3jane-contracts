@@ -7,7 +7,9 @@ pragma solidity >=0.5.0;
  * @notice Terms of Service: https://docs.eigenlayer.xyz/overview/terms-of-service
  * @notice Custom `Strategy` implementations may expand extensively on this interface.
  */
-interface IStrategy {}
+interface IStrategy {
+
+}
 
 /**
  * @title Interface for the primary entrypoint for funds into EigenLayer.
