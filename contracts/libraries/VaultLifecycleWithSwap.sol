@@ -36,6 +36,7 @@ library VaultLifecycleWithSwap {
         uint256 overriddenStrikePrice;
         address strikeSelection;
         address optionsPremiumPricer;
+        uint256 period;
     }
 
     /**
@@ -59,7 +60,7 @@ library VaultLifecycleWithSwap {
             uint256 delta
         )
     {
-        uint256 expiry = getNextExpiry(commitParams.currentOption);
+        uint256 expiry = getNextExpiry(commitParams.period);
 
         IStrikeSelection selection =
             IStrikeSelection(commitParams.strikeSelection);
@@ -761,6 +762,7 @@ library VaultLifecycleWithSwap {
         address owner,
         address keeper,
         address feeRecipient,
+        uint256 period,
         uint256 performanceFee,
         uint256 managementFee,
         string calldata tokenName,
@@ -770,6 +772,10 @@ library VaultLifecycleWithSwap {
         require(owner != address(0), "!owner");
         require(keeper != address(0), "!keeper");
         require(feeRecipient != address(0), "!feeRecipient");
+        require(
+            period > 0,
+            "!_period"
+        );
         require(
             performanceFee < 100 * Vault.FEE_MULTIPLIER,
             "performanceFee >= 100%"
@@ -792,47 +798,16 @@ library VaultLifecycleWithSwap {
     }
 
     /**
-     * @notice Gets the next option expiry timestamp
-     * @param currentOption is the otoken address that the vault is currently writing
+     * @notice Gets the next options expiry timestamp for the specified period
+     * @param period is no. of days in between option sales. Available periods are:
+     * 7(1w), 14(2w), 30(1m), 90(3m), 180(6m)
      */
-    function getNextExpiry(address currentOption)
+    function getNextExpiry(uint256 period)
         internal
         view
-        returns (uint256)
+        returns (uint256 nextExpiry)
     {
-        // uninitialized state
-        if (currentOption == address(0)) {
-            return getNextFriday(block.timestamp);
-        }
-        uint256 currentExpiry = IOtoken(currentOption).expiryTimestamp();
-
-        // After options expiry if no options are written for >1 week
-        // We need to give the ability continue writing options
-        if (block.timestamp > currentExpiry + 7 days) {
-            return getNextFriday(block.timestamp);
-        }
-        return getNextFriday(currentExpiry);
-    }
-
-    /**
-     * @notice Gets the next options expiry timestamp
-     * @param timestamp is the expiry timestamp of the current option
-     * Reference: https://codereview.stackexchange.com/a/33532
-     * Examples:
-     * getNextFriday(week 1 thursday) -> week 1 friday
-     * getNextFriday(week 1 friday) -> week 2 friday
-     * getNextFriday(week 1 saturday) -> week 2 friday
-     */
-    function getNextFriday(uint256 timestamp) internal pure returns (uint256) {
-        // dayOfWeek = 0 (sunday) - 6 (saturday)
-        uint256 dayOfWeek = ((timestamp / 1 days) + 4) % 7;
-        uint256 nextFriday = timestamp + ((7 + 5 - dayOfWeek) % 7) * 1 days;
-        uint256 friday8am = nextFriday - (nextFriday % (24 hours)) + (8 hours);
-
-        // If the passed timestamp is day=Friday hour>8am, we simply increment it by a week to next Friday
-        if (timestamp >= friday8am) {
-            friday8am += 7 days;
-        }
-        return friday8am;
+        nextExpiry = block.timestamp + period * 1 days;
+        nextExpiry = nextExpiry - (nextExpiry % (24 hours)) + (8 hours);
     }
 }
