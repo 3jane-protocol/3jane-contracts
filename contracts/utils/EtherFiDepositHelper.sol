@@ -21,19 +21,19 @@ contract EthenaDepositHelper {
 
     IERC20 private constant STETH = IERC20(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
 
-    // WEETH options vault
-    IRibbonThetaVault public immutable weethOptionsVault;
+    // etherfi options vault
+    IRibbonThetaVault public immutable etherFiDepositHelper;
 
     /**
      * @notice Constructor
-     * @param _weethOptionsVault is the contract address for WEETH options vault
+     * @param _etherFiDepositHelper is the contract address for WEETH options vault
      */
     constructor(
-        address _weethOptionsVault
+        address _etherFiDepositHelper
     ) {
         require(weethOptionsVault != address(0), "!weethOptionsVault");
 
-        weethOptionsVault = IRibbonThetaVault(_weethOptionsVault);
+        etherFiDepositHelper = IRibbonThetaVault(_etherFiDepositHelper);
 
         // Pre-approvals (pass-through contract)
         STETH.safeApprove(address(LIQUIFIER), type(uint256).max);
@@ -121,7 +121,7 @@ contract EthenaDepositHelper {
     function _deposit(uint256 _amount) internal {
       // Wrap EETH for WEETH
       uint256 _weethAmt = WEETH.wrap(_amount);
-      // Deposit WEETH into WEETH options vault
-      weethOptionsVault.depositFor(_weethAmt, msg.sender);
+      // Deposit WEETH into etherfi options vault
+      etherFiDepositHelper.depositFor(_weethAmt, msg.sender);
     }
 }
