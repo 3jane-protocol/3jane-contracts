@@ -4,7 +4,7 @@ pragma solidity =0.8.4;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IStrategyManager} from "./IStrategyManager.sol";
 
-interface IWEETH is IERC20{
+interface IWEETH is IERC20 {
     function wrap(uint256 assets) external returns (uint256);
 }
 

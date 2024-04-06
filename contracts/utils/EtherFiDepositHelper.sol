@@ -13,8 +13,8 @@ import {IRibbonThetaVault} from "../interfaces/IRibbonThetaVault.sol";
 contract EthenaDepositHelper {
     using SafeERC20 for IERC20;
 
-    ILiquidityPool private constant LIQUIDITY_POOL = ILiquidityPool(0x308861a430be4cce5502d0a12724771fc6daf216);
-    ILiquifier private constant LIQUIFIER = ILiquifier(0x9ffdf407cde9a93c47611799da23924af3ef764f);
+    ILiquidityPool private constant LIQUIDITY_POOL = ILiquidityPool(0x308861A430be4cce5502d0A12724771Fc6DaF216);
+    ILiquifier private constant LIQUIFIER = ILiquifier(0x9FFDF407cDe9a93c47611799DA23924Af3EF764F);
 
     IERC20 private constant EETH = IERC20(0x35fA164735182de50811E8e2E824cFb9B6118ac2);
     IWEETH private constant WEETH = IWEETH(0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee);
@@ -22,23 +22,23 @@ contract EthenaDepositHelper {
     IERC20 private constant STETH = IERC20(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
 
     // etherfi options vault
-    IRibbonThetaVault public immutable etherFiDepositHelper;
+    IRibbonThetaVault public immutable etherFiVault;
 
     /**
      * @notice Constructor
-     * @param _etherFiDepositHelper is the contract address for WEETH options vault
+     * @param _etherFiVault is the contract address for WEETH options vault
      */
     constructor(
-        address _etherFiDepositHelper
+        address _etherFiVault
     ) {
-        require(weethOptionsVault != address(0), "!weethOptionsVault");
+        require(_etherFiVault != address(0), "!etherFiVault");
 
-        etherFiDepositHelper = IRibbonThetaVault(_etherFiDepositHelper);
+        etherFiVault = IRibbonThetaVault(_etherFiVault);
 
         // Pre-approvals (pass-through contract)
         STETH.safeApprove(address(LIQUIFIER), type(uint256).max);
         EETH.safeApprove(address(WEETH), type(uint256).max);
-        WEETH.safeApprove(_weethOptionsVault, type(uint256).max);
+        IERC20(address(WEETH)).safeApprove(_etherFiVault, type(uint256).max);
     }
 
      /**
@@ -47,7 +47,6 @@ contract EthenaDepositHelper {
      * over the EIP712-formatted function arguments
      * @param _asset is the asset
      * @param _amount is the amount of `asset` to deposit
-     * @param _data is the calldata for target contract
      * @param _deadline must be a timestamp in the future
      * @param _v is a valid signature
      * @param _r is a valid signature
@@ -87,8 +86,8 @@ contract EthenaDepositHelper {
     /**
     * @notice Deposit ETH
     */
-    function depositETH() external {
-      _deposit(LIQUIDITY_POOL.deposit{value: msg.value}(address(this));
+    function depositETH() external payable {
+      _deposit(LIQUIDITY_POOL.deposit{value: msg.value}(address(this)));
     }
 
     /**
@@ -104,14 +103,14 @@ contract EthenaDepositHelper {
     * @param _asset is the asset
     * @param _amount is the amount of `asset` to deposit
     */
-    function _bring(IERC20 _asset, uint256 amount) internal returns (uint256){
+    function _bring(IERC20 _asset, uint256 _amount) internal returns (uint256){
       _asset.safeTransferFrom(msg.sender, address(this), _amount);
 
-      if(_asset != address(EETH)){
-        return LIQUIDITY_POOL.depositWithERC20(_asset, _amount, address(this));
+      if(_asset != EETH){
+        return LIQUIFIER.depositWithERC20(address(_asset), _amount, address(this));
       }
 
-      return amount;
+      return _amount;
     }
 
     /**
@@ -122,6 +121,6 @@ contract EthenaDepositHelper {
       // Wrap EETH for WEETH
       uint256 _weethAmt = WEETH.wrap(_amount);
       // Deposit WEETH into etherfi options vault
-      etherFiDepositHelper.depositFor(_weethAmt, msg.sender);
+      etherFiVault.depositFor(_weethAmt, msg.sender);
     }
 }
