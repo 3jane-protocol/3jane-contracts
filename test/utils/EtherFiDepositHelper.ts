@@ -28,8 +28,8 @@ const chainId = network.config.chainId;
 describe("EtherFiDepositHelper", () => {
   time.revertToSnapshotAfterEach();
 
-  let etherFiDepositHelper: Contract;
-  let etherFiThetaVault: Contract;
+  let etherfiDepositHelper: Contract;
+  let etherfiThetaVault: Contract;
   let steth: Contract;
   let eeth: Contract;
   let weeth: Contract;
@@ -60,7 +60,7 @@ describe("EtherFiDepositHelper", () => {
       signer
     );
 
-    etherFiThetaVault = await EtherFiThetaVault.connect(signer).deploy(
+    etherfiThetaVault = await EtherFiThetaVault.connect(signer).deploy(
       WEETH_ADDRESS
     );
 
@@ -69,31 +69,31 @@ describe("EtherFiDepositHelper", () => {
       signer
     );
 
-    etherFiDepositHelper = await EtherFiDepositHelper.connect(signer).deploy(
-      etherFiThetaVault.address
+    etherfiDepositHelper = await EtherFiDepositHelper.connect(signer).deploy(
+      etherfiThetaVault.address
     );
   });
 
   it("#constructor", async () => {
     assert.equal(
-      await etherFiDepositHelper.etherFiVault(),
-      etherFiThetaVault.address
+      await etherfiDepositHelper.etherfiVault(),
+      etherfiThetaVault.address
     );
     assert.bnGt(
       await steth.allowance(
-        etherFiDepositHelper.address,
+        etherfiDepositHelper.address,
         ETHERFI_LIQUIFIER_ADDRESS
       ),
       0
     );
     assert.bnGt(
-      await eeth.allowance(etherFiDepositHelper.address, WEETH_ADDRESS),
+      await eeth.allowance(etherfiDepositHelper.address, WEETH_ADDRESS),
       0
     );
     assert.bnGt(
       await weeth.allowance(
-        etherFiDepositHelper.address,
-        etherFiThetaVault.address
+        etherfiDepositHelper.address,
+        etherfiThetaVault.address
       ),
       0
     );
@@ -102,15 +102,15 @@ describe("EtherFiDepositHelper", () => {
   it("#depositETH", async () => {
     let depositAmount = BigNumber.from("10").mul(BigNumber.from(10).pow(18));
 
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), 0);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), 0);
 
-    const res = await etherFiDepositHelper.depositETH({ value: depositAmount });
+    const res = await etherfiDepositHelper.depositETH({ value: depositAmount });
 
-    console.log((await weeth.balanceOf(etherFiThetaVault.address)).toString());
+    console.log((await weeth.balanceOf(etherfiThetaVault.address)).toString());
 
     let out = 9657399393947164508;
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
-    assert.equal(await etherFiThetaVault.balance(signer.address), out);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), out);
+    assert.equal(await etherfiThetaVault.balance(signer.address), out);
   });
 
   it("#depositWithPermitEETH", async () => {
@@ -128,7 +128,7 @@ describe("EtherFiDepositHelper", () => {
     const { v, r, s } = await getPermitSignature(
       rdmWallet,
       eeth,
-      etherFiDepositHelper.address,
+      etherfiDepositHelper.address,
       depositAmount,
       constants.MaxUint256,
       {
@@ -139,9 +139,9 @@ describe("EtherFiDepositHelper", () => {
       }
     );
 
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), 0);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), 0);
 
-    const res = await etherFiDepositHelper
+    const res = await etherfiDepositHelper
       .connect(await ethers.provider.getSigner(rdmWallet.address))
       .depositWithPermit(
         eeth.address,
@@ -153,8 +153,8 @@ describe("EtherFiDepositHelper", () => {
       );
 
     let out = 96573993939471645097;
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
-    assert.equal(await etherFiThetaVault.balance(rdmWallet.address), out);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), out);
+    assert.equal(await etherfiThetaVault.balance(rdmWallet.address), out);
   });
 
   it("#depositWithPermitSTETH", async () => {
@@ -172,7 +172,7 @@ describe("EtherFiDepositHelper", () => {
     const { v, r, s } = await getPermitSignature(
       rdmWallet,
       steth,
-      etherFiDepositHelper.address,
+      etherfiDepositHelper.address,
       depositAmount,
       constants.MaxUint256,
       {
@@ -183,9 +183,9 @@ describe("EtherFiDepositHelper", () => {
       }
     );
 
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), 0);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), 0);
 
-    const res = await etherFiDepositHelper
+    const res = await etherfiDepositHelper
       .connect(await ethers.provider.getSigner(rdmWallet.address))
       .depositWithPermit(
         steth.address,
@@ -197,8 +197,8 @@ describe("EtherFiDepositHelper", () => {
       );
 
     let out = 96573993939471645096;
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
-    assert.equal(await etherFiThetaVault.balance(rdmWallet.address), out);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), out);
+    assert.equal(await etherfiThetaVault.balance(rdmWallet.address), out);
   });
 
   it("#depositSTETH", async () => {
@@ -212,17 +212,17 @@ describe("EtherFiDepositHelper", () => {
     );
     await steth
       .connect(signer)
-      .approve(etherFiDepositHelper.address, depositAmount);
+      .approve(etherfiDepositHelper.address, depositAmount);
 
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), 0);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), 0);
 
-    const res = await etherFiDepositHelper.deposit(
+    const res = await etherfiDepositHelper.deposit(
       steth.address,
       depositAmount
     );
 
     let out = 96573993939471645096;
-    assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
-    assert.equal(await etherFiThetaVault.balance(signer.address), out);
+    assert.equal(await weeth.balanceOf(etherfiThetaVault.address), out);
+    assert.equal(await etherfiThetaVault.balance(signer.address), out);
   });
 });

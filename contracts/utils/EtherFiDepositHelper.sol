@@ -16,7 +16,7 @@ import {
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRibbonThetaVault} from "../interfaces/IRibbonThetaVault.sol";
 
-contract EtherFiDepositHelper {
+contract EtherfiDepositHelper {
     using SafeERC20 for IERC20;
 
     ILiquidityPool private constant LIQUIDITY_POOL =
@@ -33,21 +33,21 @@ contract EtherFiDepositHelper {
         IERC20(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
 
     // etherfi options vault
-    IRibbonThetaVault public immutable etherFiVault;
+    IRibbonThetaVault public immutable etherfiVault;
 
     /**
      * @notice Constructor
-     * @param _etherFiVault is the contract address for WEETH options vault
+     * @param _etherfiVault is the contract address for WEETH options vault
      */
-    constructor(address _etherFiVault) {
-        require(_etherFiVault != address(0), "!etherFiVault");
+    constructor(address _etherfiVault) {
+        require(_etherfiVault != address(0), "!etherfiVault");
 
-        etherFiVault = IRibbonThetaVault(_etherFiVault);
+        etherfiVault = IRibbonThetaVault(_etherfiVault);
 
         // Pre-approvals (pass-through contract)
         STETH.safeApprove(address(LIQUIFIER), type(uint256).max);
         EETH.safeApprove(address(WEETH), type(uint256).max);
-        IERC20(address(WEETH)).safeApprove(_etherFiVault, type(uint256).max);
+        IERC20(address(WEETH)).safeApprove(_etherfiVault, type(uint256).max);
     }
 
     /**
@@ -146,6 +146,6 @@ contract EtherFiDepositHelper {
         // Wrap EETH for WEETH
         uint256 _weethAmt = WEETH.wrap(_amount);
         // Deposit WEETH into etherfi options vault
-        etherFiVault.depositFor(_weethAmt, msg.sender);
+        etherfiVault.depositFor(_weethAmt, msg.sender);
     }
 }
