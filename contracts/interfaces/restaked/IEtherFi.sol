@@ -35,7 +35,4 @@ interface ILiquifier {
     /// @param _referral The referral address
     /// @return mintedAmount the amount of eETH minted to the caller (= msg.sender)
     function depositWithERC20(address _token, uint256 _amount, address _referral) external returns (uint256);
-
-
-    function depositWithERC20WithPermit(address _token, uint256 _amount, address _referral, PermitInput calldata _permit) external returns (uint256);
 }
