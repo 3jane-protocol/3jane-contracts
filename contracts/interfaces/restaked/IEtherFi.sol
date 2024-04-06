@@ -10,6 +10,7 @@ interface IWEETH is IERC20 {
 
 interface ILiquidityPool {
     function deposit(address _referral) external payable returns (uint256);
+    function amountForShare(uint256 _share) external view returns (uint256);
 }
 
 interface ILiquifier {

@@ -10,7 +10,7 @@ import {
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRibbonThetaVault} from "../interfaces/IRibbonThetaVault.sol";
 
-contract EthenaDepositHelper {
+contract EtherFiDepositHelper {
     using SafeERC20 for IERC20;
 
     ILiquidityPool private constant LIQUIDITY_POOL = ILiquidityPool(0x308861A430be4cce5502d0A12724771Fc6DaF216);
@@ -87,7 +87,8 @@ contract EthenaDepositHelper {
     * @notice Deposit ETH
     */
     function depositETH() external payable {
-      _deposit(LIQUIDITY_POOL.deposit{value: msg.value}(address(this)));
+      uint256 shares = LIQUIDITY_POOL.deposit{value: msg.value}(address(this));
+      _deposit(LIQUIDITY_POOL.amountForShare(shares));
     }
 
     /**
@@ -95,19 +96,22 @@ contract EthenaDepositHelper {
     * @param _queuedWithdrawal The QueuedWithdrawal to be used for the deposit. This is the proof that the user has the re-staked ETH and requested the withdrawals setting the Liquifier contract as the withdrawer.
     */
     function depositWithQueuedWithdrawal(IStrategyManager.QueuedWithdrawal calldata _queuedWithdrawal) external {
-      _deposit(LIQUIFIER.depositWithQueuedWithdrawal(_queuedWithdrawal, address(this)));
+      uint256 shares = LIQUIFIER.depositWithQueuedWithdrawal(_queuedWithdrawal, address(this));
+      _deposit(LIQUIDITY_POOL.amountForShare(shares));
     }
 
     /**
     * @notice Transfers asset in and swaps to EETH
     * @param _asset is the asset
     * @param _amount is the amount of `asset` to deposit
+    * @return amount if eeth, shares otherwise
     */
     function _bring(IERC20 _asset, uint256 _amount) internal returns (uint256){
       _asset.safeTransferFrom(msg.sender, address(this), _amount);
 
       if(_asset != EETH){
-        return LIQUIFIER.depositWithERC20(address(_asset), _amount, address(this));
+        uint256 shares = LIQUIFIER.depositWithERC20(address(_asset), _amount, address(this));
+        return LIQUIDITY_POOL.amountForShare(shares);
       }
 
       return _amount;

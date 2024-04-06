@@ -43,7 +43,7 @@ describe("EtherFiDepositHelper", () => {
         {
           forking: {
             jsonRpcUrl: TEST_URI[chainId],
-            blockNumber: 19572557,
+            blockNumber: 19594142,
           },
         },
       ],
@@ -82,9 +82,9 @@ describe("EtherFiDepositHelper", () => {
   });
 
   it("#depositWithPermitEETH", async () => {
-      let depositAmount = BigNumber.from("100").mul(10 ** 18)
+      let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(18))
 
-      await mintToken(usdc, EETH_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+      await mintToken(eeth, EETH_OWNER_ADDRESS[chainId], signer.address, depositAmount);
 
       let rdmWallet: Wallet = await generateWallet(
               eeth,
@@ -112,49 +112,48 @@ describe("EtherFiDepositHelper", () => {
      .connect(await ethers.provider.getSigner(rdmWallet.address))
      .depositWithPermit(eeth.address, depositAmount, constants.MaxUint256, v, r, s);
 
-     console.log((await susde.balanceOf(etherFiThetaVault.address)).toString());
-     let out = 95890740833154663191;
-     assert.equal(await susde.balanceOf(etherFiThetaVault.address), out);
+     let out = 96573993939471645097;
+     assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
      assert.equal(await etherFiThetaVault.balance(rdmWallet.address), out);
   });
-  /*
-  it("#depositWithPermitUSDE", async () => {
+
+  it("#depositWithPermitSTETH", async () => {
       let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(18))
 
-      await mintToken(usde, USDE_OWNER_ADDRESS[chainId], signer.address, depositAmount);
+      await mintToken(steth, STETH_OWNER_ADDRESS[chainId], signer.address, depositAmount);
 
       let rdmWallet: Wallet = await generateWallet(
-              usde,
+              steth,
               depositAmount,
               signer
             );
 
       const { v, r, s } = await getPermitSignature(
         rdmWallet,
-        usde,
+        steth,
         etherFiDepositHelper.address,
         depositAmount,
         constants.MaxUint256,
         {
           nonce: 0,
-          name: "USDe",
+          name: "Liquid staked Ether 2.0",
           chainId: 1,
-          version: "1",
+          version: "2",
         }
       );
 
-      assert.equal(await susde.balanceOf(etherFiThetaVault.address), 0);
+      assert.equal(await weeth.balanceOf(etherFiThetaVault.address), 0);
 
         const res = await etherFiDepositHelper
      .connect(await ethers.provider.getSigner(rdmWallet.address))
-     .depositWithPermit(usde.address, depositAmount, "0x", constants.MaxUint256, v, r, s);
+     .depositWithPermit(steth.address, depositAmount, constants.MaxUint256, v, r, s);
 
-     let out = 96078959250706849469;
-     assert.equal(await susde.balanceOf(etherFiThetaVault.address), out);
+     let out = 96573993939471645096;
+     assert.equal(await weeth.balanceOf(etherFiThetaVault.address), out);
      assert.equal(await etherFiThetaVault.balance(rdmWallet.address), out);
   });
 
-  it("#depositDAI", async () => {
+  /*it("#depositDAI", async () => {
       let depositAmount = BigNumber.from("100").mul(BigNumber.from(10).pow(18))
 
       await mintToken(dai, DAI_OWNER_ADDRESS[chainId], signer.address, depositAmount);
