@@ -61,7 +61,9 @@ contract EtherfiDepositHelper {
 
     /**
      * @notice Deposit With Queued Withdrawal
-     * @param _queuedWithdrawal The QueuedWithdrawal to be used for the deposit. This is the proof that the user has the re-staked ETH and requested the withdrawals setting the Liquifier contract as the withdrawer.
+     * @param _queuedWithdrawal The QueuedWithdrawal to be used for the deposit.
+     *         This is the proof that the user has the re-staked ETH and requested the
+     *         withdrawals setting the Liquifier contract as the withdrawer.
      */
     function depositWithQueuedWithdrawal(
         IStrategyManager.QueuedWithdrawal calldata _queuedWithdrawal
