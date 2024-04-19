@@ -68,6 +68,7 @@ describe("RibbonThetaVaultWithSwap", () => {
     deltaStep: getDeltaStep("WBTC"),
     tokenDecimals: 8,
     depositAmount: BigNumber.from("100000000"),
+    period: 7,
     managementFee: BigNumber.from("2000000"),
     performanceFee: BigNumber.from("20000000"),
     minimumSupply: BigNumber.from("10").pow("3").toString(),
@@ -112,6 +113,7 @@ type Option = {
  * @param {BigNumber} params.depositAmount - Deposit amount
  * @param {string} params.minimumSupply - Minimum supply to maintain for share and asset balance
  * @param {BigNumber} params.expectedMintAmount - Expected oToken amount to be minted with our deposit
+ * @param {number} params.period: - Period between each options sale
  * @param {BigNumber} params.managementFee - Management fee (6 decimals)
  * @param {BigNumber} params.performanceFee - PerformanceFee fee (6 decimals)
  * @param {boolean} params.isPut - Boolean flag for if the vault sells call or put options
@@ -133,6 +135,7 @@ function behavesLikeRibbonOptionsVault(params: {
   depositAmount: BigNumber;
   minimumSupply: string;
   expectedMintAmount: BigNumber;
+  period: number;
   managementFee: BigNumber;
   performanceFee: BigNumber;
   isPut: boolean;
@@ -178,6 +181,7 @@ function behavesLikeRibbonOptionsVault(params: {
   let asset = params.asset;
   let collateralAsset = params.collateralAsset;
   let depositAmount = params.depositAmount;
+  let period = params.period;
   let managementFee = params.managementFee;
   let performanceFee = params.performanceFee;
   let isPut = params.isPut;
@@ -334,6 +338,7 @@ function behavesLikeRibbonOptionsVault(params: {
           owner,
           keeper,
           feeRecipient,
+          period,
           managementFee,
           performanceFee,
           tokenName,
@@ -506,9 +511,17 @@ function behavesLikeRibbonOptionsVault(params: {
         assert.equal(await vault.owner(), owner);
         assert.equal(await vault.keeper(), keeper);
         assert.equal(await vault.feeRecipient(), feeRecipient);
+        assert.equal(await vault.period(), period);
         assert.equal(
           (await vault.managementFee()).toString(),
-          managementFee.mul(FEE_SCALING).div(WEEKS_PER_YEAR).toString()
+          managementFee
+            .mul(FEE_SCALING)
+            .div(
+              period % 30 === 0
+                ? FEE_SCALING.mul(12 / (period / 30))
+                : BigNumber.from(WEEKS_PER_YEAR).div(period / 7)
+            )
+            .toString()
         );
         assert.equal(
           (await vault.performanceFee()).toString(),
@@ -548,6 +561,7 @@ function behavesLikeRibbonOptionsVault(params: {
               owner,
               keeper,
               feeRecipient,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -574,6 +588,7 @@ function behavesLikeRibbonOptionsVault(params: {
               constants.AddressZero,
               keeper,
               feeRecipient,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -600,6 +615,7 @@ function behavesLikeRibbonOptionsVault(params: {
               owner,
               constants.AddressZero,
               feeRecipient,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -626,6 +642,7 @@ function behavesLikeRibbonOptionsVault(params: {
               owner,
               keeper,
               constants.AddressZero,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -652,6 +669,7 @@ function behavesLikeRibbonOptionsVault(params: {
               owner,
               keeper,
               feeRecipient,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -678,6 +696,7 @@ function behavesLikeRibbonOptionsVault(params: {
               owner,
               keeper,
               feeRecipient,
+              period,
               managementFee,
               performanceFee,
               tokenName,
@@ -726,11 +745,18 @@ function behavesLikeRibbonOptionsVault(params: {
       it("returns the management fee", async function () {
         assert.equal(
           (await vault.managementFee()).toString(),
-          managementFee.mul(FEE_SCALING).div(WEEKS_PER_YEAR).toString()
+          managementFee
+            .mul(FEE_SCALING)
+            .div(
+              period % 30 === 0
+                ? FEE_SCALING.mul(12 / (period / 30))
+                : BigNumber.from(WEEKS_PER_YEAR).div(period / 7)
+            )
+            .toString()
         );
       });
     });
-
+    
     describe("#performanceFee", () => {
       it("returns the performance fee", async function () {
         assert.equal(

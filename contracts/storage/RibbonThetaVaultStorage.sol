@@ -27,8 +27,6 @@ abstract contract RibbonThetaVaultStorageV1 {
 // When we need to add new storage variables, we create a new version of RibbonThetaVaultStorage
 // e.g. RibbonThetaVaultStorage<versionNumber>, so finally it would look like
 // contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1
-abstract contract RibbonThetaVaultStorage is
-    RibbonThetaVaultStorageV1
-{
+abstract contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1 {
 
 }
