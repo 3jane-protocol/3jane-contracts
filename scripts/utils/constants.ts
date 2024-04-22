@@ -20,6 +20,7 @@ export const PREMIUM_DISCOUNT = 200; // 0.20, 80% discount
 export const AUCTION_DURATION = 600; // 10 minutes
 export const PERFORMANCE_FEE = 10000000;
 export const MANAGEMENT_FEE = 2000000; // 2% per year. 2 * 10**6. Should result in 38356 per week.
+export const PERIOD = 7 // 7 days
 
 /**
  * Treasury Vault Params

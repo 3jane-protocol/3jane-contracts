@@ -1,8 +1,6 @@
 import { run } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
-  WETH_ADDRESS,
-  USDC_ADDRESS,
   OTOKEN_FACTORY,
   MARGIN_POOL,
   GAMMA_CONTROLLER,
@@ -30,8 +28,6 @@ const main = async ({
     contract: "RibbonThetaVaultWithSwap",
     from: deployer,
     args: [
-      WETH_ADDRESS[chainId],
-      USDC_ADDRESS[chainId],
       OTOKEN_FACTORY[chainId],
       GAMMA_CONTROLLER[chainId],
       MARGIN_POOL[chainId],
@@ -57,8 +53,6 @@ const main = async ({
     await run("verify:verify", {
       address: vault.address,
       constructorArguments: [
-        WETH_ADDRESS[chainId],
-        USDC_ADDRESS[chainId],
         OTOKEN_FACTORY[chainId],
         GAMMA_CONTROLLER[chainId],
         MARGIN_POOL[chainId],
