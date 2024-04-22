@@ -17,10 +17,6 @@ import {
   WETH_ADDRESS,
   ManualVolOracle_BYTECODE,
   OptionsPremiumPricerInStables_BYTECODE,
-  STETH_ADDRESS,
-  UNI_ADDRESS,
-  CHAINLINK_UNI_PRICER,
-  UNI_OWNER_ADDRESS,
 } from "../constants/constants";
 import {
   deployProxy,
@@ -756,7 +752,7 @@ function behavesLikeRibbonOptionsVault(params: {
         );
       });
     });
-    
+
     describe("#performanceFee", () => {
       it("returns the performance fee", async function () {
         assert.equal(

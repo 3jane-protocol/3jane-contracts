@@ -24,7 +24,6 @@ import {
   getPermitSignature,
   getQuote,
   mintToken,
-  approve,
 } from "../helpers/utils";
 import * as time from "../helpers/time";
 

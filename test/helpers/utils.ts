@@ -739,10 +739,6 @@ export const getDeltaStep = (asset: string) => {
   }
 };
 
-export const getPricerABI = (pricer: string) => {
-  return CHAINLINK_PRICER_ABI;
-};
-
 export const getPricerAsset = async (pricer: Contract) => {
   switch (pricer.address) {
     case SAVAX_PRICER:
@@ -802,7 +798,7 @@ export const getAuctionMinPrice = async (
 };
 
 export async function getPermitSignature(
-  wallet: Wallet,
+  wallet,
   token: Contract,
   spender: string,
   value: BigNumberish,
