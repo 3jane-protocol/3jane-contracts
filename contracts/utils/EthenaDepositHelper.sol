@@ -73,6 +73,7 @@ contract EthenaDepositHelper is Ownable {
 
     /**
      * @notice Deposits asset without an approve
+     * @notice ONLY FOR USDC, WILL FAIL FOR USDT, DAI
      * `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
      * over the EIP712-formatted function arguments
      * @param _asset is the asset
