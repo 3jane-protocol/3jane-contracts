@@ -2,7 +2,6 @@ import { run } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   NETWORK_NAMES,
-  ETHENA_SWAP_SLIPPAGE,
 } from "../../constants/constants";
 
 const main = async ({
@@ -20,7 +19,6 @@ const main = async ({
 
   const constructorArguments = [
     sUSDEThetaVault.address,
-    ETHENA_SWAP_SLIPPAGE,
   ];
 
   const ethenaDepositHelper = await deploy(`EthenaDepositHelper${networkName}`, {
