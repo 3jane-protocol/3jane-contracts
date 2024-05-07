@@ -119,6 +119,8 @@ contract EthenaDepositHelper is Ownable {
         uint256 _minAmountOut,
         bytes calldata _data
     ) internal returns (uint256) {
+        require(abi.decode(_data[:4], (bytes4)) == 0x07ed2379, "!swap");
+
         uint256 _usdeBalBefore = USDE.balanceOf(address(this));
 
         // Double-approve for non-compliant USDT
