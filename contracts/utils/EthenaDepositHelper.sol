@@ -126,8 +126,16 @@ contract EthenaDepositHelper is Ownable {
             USDT.safeApprove(TARGET, _amount);
         }
 
-        (bool success, ) = TARGET.call(_data);
-        require(success, "!success");
+        (bool success, bytes memory result) = TARGET.call(_data);
+
+        if (!success) {
+          // If there is return data, the call reverted without a reason or a custom error.
+          if (result.length == 0) revert();
+          assembly {
+            // We use Yul's revert() to bubble up errors from the target contract.
+            revert(add(32, result), mload(result))
+          }
+        }
 
         uint256 _usdeBal = USDE.balanceOf(address(this)).sub(_usdeBalBefore);
 
