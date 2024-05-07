@@ -330,9 +330,9 @@ contract RibbonVault is
     {
         uint256 _period = period;
         uint256 feeDivider =
-            _period % 30 == 0
-                ? Vault.FEE_MULTIPLIER * (12 / (_period / 30))
-                : WEEKS_PER_YEAR / (_period / 7);
+          _period % 30 == 0
+              ? (Vault.FEE_MULTIPLIER * 12 * 30)/ _period
+              : (WEEKS_PER_YEAR * 7) / _period;
 
         // We are dividing annualized management fee by num weeks in a year
         return _managementFee.mul(Vault.FEE_MULTIPLIER).div(feeDivider);
