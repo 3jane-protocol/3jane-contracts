@@ -32,28 +32,17 @@ contract EthenaDepositHelper is Ownable {
     IERC20 private constant DAI =
         IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
 
-    // 100% 2dp
-    uint256 private constant MAX_SLIPPAGE = 10000;
-    // 3% 2dp
-    uint256 private constant MAX_SLIPPAGE_FLOOR = 300;
-
     // sUSDE options vault
     IRibbonThetaVault public immutable ethenaVault;
-
-    // slippage on stable -> USDe conversion
-    uint256 public slippage;
 
     /**
      * @notice Constructor
      * @param _ethenaVault is the contract address for sUSDe options vault
-     * @param _slippage is the slippage setting for stables -> sUSDE conversion
      */
-    constructor(address _ethenaVault, uint256 _slippage) {
+    constructor(address _ethenaVault) {
         require(_ethenaVault != address(0), "!_ethenaVault");
-        require(_slippage <= MAX_SLIPPAGE_FLOOR, "!_slippage");
 
         ethenaVault = IRibbonThetaVault(_ethenaVault);
-        slippage = _slippage;
 
         // Pre-approvals (pass-through contract)
         USDC.safeApprove(TARGET, type(uint256).max);
@@ -63,20 +52,12 @@ contract EthenaDepositHelper is Ownable {
     }
 
     /**
-     * @notice Sets the new slippage on trades
-     * @param _slippage is the new slippage with 2 dp
-     */
-    function setSlippage(uint256 _slippage) external onlyOwner {
-        require(_slippage <= MAX_SLIPPAGE_FLOOR, "!_slippage");
-        slippage = _slippage;
-    }
-
-    /**
      * @notice Deposits asset without an approve
      * `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
      * over the EIP712-formatted function arguments
      * @param _asset is the asset
      * @param _amount is the amount of `asset` to deposit
+     * @param _minAmountOut is the min amount of USDE to receive
      * @param _data is the calldata for target contract
      * @param _deadline must be a timestamp in the future
      * @param _v is a valid signature
@@ -86,6 +67,7 @@ contract EthenaDepositHelper is Ownable {
     function depositWithPermit(
         IERC20 _asset,
         uint256 _amount,
+        uint256 _minAmountOut,
         bytes calldata _data,
         uint256 _deadline,
         uint8 _v,
@@ -103,33 +85,37 @@ contract EthenaDepositHelper is Ownable {
             _s
         );
 
-        _deposit(_asset, _amount, _data);
+        _deposit(_asset, _amount, _minAmountOut, _data);
     }
 
     /**
      * @notice Deposits asset with approve
      * @param _asset is the asset
      * @param _amount is the amount of `asset` to deposit
+     * @param _minAmountOut is the min amount of USDE to receive
      * @param _data is the calldata for target contract
      */
     function deposit(
         IERC20 _asset,
         uint256 _amount,
+        uint256 _minAmountOut,
         bytes calldata _data
     ) external {
-        _deposit(_asset, _amount, _data);
+        _deposit(_asset, _amount, _minAmountOut, _data);
     }
 
     /**
      * @notice Swaps from USDC,DAI,USDT to USDe
      * @param _asset is the asset (ex: USDC, USDT, DAI)
      * @param _amount is the amount of `_asset` to deposit
+     * @param _minAmountOut is the min amount of USDE to receive
      * @param _data is the calldata for target contract
      * @return amount out in USDe
      */
     function _swap(
         IERC20 _asset,
         uint256 _amount,
+        uint256 _minAmountOut,
         bytes calldata _data
     ) internal returns (uint256) {
         uint256 _usdeBalBefore = USDE.balanceOf(address(this));
@@ -144,22 +130,9 @@ contract EthenaDepositHelper is Ownable {
         require(success, "!success");
 
         uint256 _usdeBal = USDE.balanceOf(address(this)).sub(_usdeBalBefore);
-        uint256 amountAdj =
-            _amount.mul(
-                10 **
-                    (
-                        uint256(18).sub(
-                            IERC20Detailed(address(_asset)).decimals()
-                        )
-                    )
-            );
 
         // Target call must result in sufficient USDe
-        require(
-            _usdeBal >=
-                amountAdj.mul(MAX_SLIPPAGE.sub(slippage)).div(MAX_SLIPPAGE),
-            "!_usdeBal"
-        );
+        require(_usdeBal >= _minAmountOut, "!_usdeBal");
 
         return _usdeBal;
     }
@@ -168,11 +141,13 @@ contract EthenaDepositHelper is Ownable {
      * @notice Swaps, stakes for sUSDe, deposits into ethena options vault
      * @param _asset is the asset (ex: USDC, USDT, DAI)
      * @param _amount is the amount of `_asset` to deposit
+     * @param _minAmountOut is the min amount of USDE to receive
      * @param _data is the calldata for target contract
      */
     function _deposit(
         IERC20 _asset,
         uint256 _amount,
+        uint256 _minAmountOut,
         bytes calldata _data
     ) internal {
         require(
@@ -184,7 +159,7 @@ contract EthenaDepositHelper is Ownable {
 
         // If not USDE then swap for USDE
         if (_asset != USDE) {
-            _amount = _swap(_asset, _amount, _data);
+            _amount = _swap(_asset, _amount, _minAmountOut, _data);
         }
 
         // Stake USDE for sUSDE
