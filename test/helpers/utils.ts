@@ -36,6 +36,7 @@ import {
   CHAINLINK_WETH_PRICER,
   UNI_ADDRESS,
   WETH_ADDRESS,
+  WEETH_ADDRESS,
   ETH_PRICE_ORACLE,
   UNI_PRICE_ORACLE,
   BTC_PRICE_ORACLE,
@@ -120,8 +121,10 @@ export async function getBlockNum(asset: string, chainId: number) {
     return 16000050;
   } else if (asset === BADGER_ADDRESS[chainId]) {
     return 15012740;
-  } else {
+  } else if (asset === WBTC_ADDRESS[chainId]){
     return 15012740;
+  } else {
+    return 19672061;
   }
 }
 
@@ -458,6 +461,7 @@ export async function mintToken(
   spender: string,
   amount: BigNumberish
 ) {
+
   const tokenOwnerSigner = await ethers.provider.getSigner(contractOwner);
 
   await network.provider.request({
@@ -486,7 +490,8 @@ export async function mintToken(
     contract.address === BAL_ADDRESS[chainId] ||
     contract.address === SPELL_ADDRESS[chainId] ||
     contract.address === RETH_ADDRESS[chainId] ||
-    contract.address === UNI_ADDRESS[chainId]
+    contract.address === UNI_ADDRESS[chainId] ||
+    contract.address === WEETH_ADDRESS
   ) {
     await contract.connect(tokenOwnerSigner).transfer(recipient, amount);
   } else {
@@ -890,28 +895,6 @@ export async function generateWallet(
   return signer;
 }
 
-export async function mintToken(
-  contract: Contract,
-  contractOwner: string,
-  spender: string,
-  amount: BigNumberish
-) {
-  const tokenOwnerSigner = await ethers.provider.getSigner(contractOwner);
-
-  await network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [contractOwner],
-  });
-
-  await contract.connect(tokenOwnerSigner).transfer(spender, amount);
-
-  await network.provider.request({
-    method: "hardhat_stopImpersonatingAccount",
-    params: [contractOwner],
-  });
-}
-
-
 export async function approve(
   contract: Contract,
   approver: string,
@@ -927,8 +910,6 @@ export async function approve(
 
   await contract.connect(tokenOwnerSigner).approve(spender, amount);
 
-  console.log("allowance");
-  console.log((await contract.allowance(approver, spender)).toString());
   await network.provider.request({
     method: "hardhat_stopImpersonatingAccount",
     params: [approver],
