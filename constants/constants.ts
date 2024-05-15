@@ -546,6 +546,8 @@ export const CB = 0; // FIXED requires 0 CB
 export const OBSERVATION_FREQUENCY = 604800; // 7 days
 export const AUTOCALL_SELLER = ""; // Marex address
 
+export const AMPLOL = "0x0000000000000000000000000000000000000000";
+
 /**
  * RVol Bytecode
  */
