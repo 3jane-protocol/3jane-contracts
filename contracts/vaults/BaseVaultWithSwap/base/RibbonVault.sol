@@ -21,6 +21,7 @@ import {
     VaultLifecycleWithSwap
 } from "../../../libraries/VaultLifecycleWithSwap.sol";
 import {ShareMath} from "../../../libraries/ShareMath.sol";
+import {IAmplol} from "../../../interfaces/IAmplol.sol";
 
 contract RibbonVault is
     ReentrancyGuardUpgradeable,
@@ -102,6 +103,9 @@ contract RibbonVault is
     // https://github.com/ribbon-finance/ribbon-v2/blob/master/contracts/utils/Swap.sol
     address public immutable SWAP_CONTRACT;
 
+    /// @notice amplol is the amplol address.
+    IAMPLOL public immutable AMPLOL;
+
     /************************************************
      *  EVENTS
      ***********************************************/
@@ -140,19 +144,23 @@ contract RibbonVault is
      * @param _gammaController is the contract address for opyn actions
      * @param _marginPool is the contract address for providing collateral to opyn
      * @param _swapContract is the contract address that facilitates bids settlement
+     * @param _amplol is the contract address for AMPLOLs
      */
     constructor(
         address _gammaController,
         address _marginPool,
-        address _swapContract
+        address _swapContract,
+        address _amplol
     ) {
         require(_swapContract != address(0), "!_swapContract");
         require(_gammaController != address(0), "!_gammaController");
         require(_marginPool != address(0), "!_marginPool");
+        require(_amplol != address(0), "!_amplol");
 
         GAMMA_CONTROLLER = _gammaController;
         MARGIN_POOL = _marginPool;
         SWAP_CONTRACT = _swapContract;
+        AMPLOL = IAMPLOL(_amplol);
     }
 
     /**
@@ -385,6 +393,7 @@ contract RibbonVault is
         ShareMath.assertUint128(newTotalPending);
 
         vaultState.totalPending = uint128(newTotalPending);
+        AMPLOL.mint(creditor, amount);
     }
 
     /**
@@ -462,6 +471,8 @@ contract RibbonVault is
 
         require(withdrawAmount > 0, "!withdrawAmount");
         transferAsset(msg.sender, withdrawAmount);
+        
+        AMPLOL.mint(msg.sender, withdrawAmount);
 
         return withdrawAmount;
     }

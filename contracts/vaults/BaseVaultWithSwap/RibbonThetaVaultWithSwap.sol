@@ -116,14 +116,17 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
      * @param _gammaController is the contract address for opyn actions
      * @param _marginPool is the contract address for providing collateral to opyn
      * @param _swapContract is the contract address that facilitates bids settlement
+     * @param _amplol is the contract address for AMPLOLs
      */
     constructor(
         address _oTokenFactory,
         address _gammaController,
         address _marginPool,
-        address _swapContract
-    ) RibbonVault(_gammaController, _marginPool, _swapContract) {
+        address _swapContract,
+        address _amplol
+    ) RibbonVault(_gammaController, _marginPool, _swapContract, _amplol) {
         require(_oTokenFactory != address(0), "!_oTokenFactory");
+
         OTOKEN_FACTORY = _oTokenFactory;
     }
 
