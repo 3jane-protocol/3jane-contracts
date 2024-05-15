@@ -104,7 +104,7 @@ contract RibbonVault is
     address public immutable SWAP_CONTRACT;
 
     /// @notice amplol is the amplol address.
-    IAMPLOL public immutable AMPLOL;
+    IAmplol public immutable AMPLOL;
 
     /************************************************
      *  EVENTS
@@ -160,7 +160,7 @@ contract RibbonVault is
         GAMMA_CONTROLLER = _gammaController;
         MARGIN_POOL = _marginPool;
         SWAP_CONTRACT = _swapContract;
-        AMPLOL = IAMPLOL(_amplol);
+        AMPLOL = IAmplol(_amplol);
     }
 
     /**
@@ -471,7 +471,7 @@ contract RibbonVault is
 
         require(withdrawAmount > 0, "!withdrawAmount");
         transferAsset(msg.sender, withdrawAmount);
-        
+
         AMPLOL.mint(msg.sender, withdrawAmount);
 
         return withdrawAmount;
