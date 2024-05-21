@@ -36,6 +36,8 @@ interface ISwap {
         uint256 nonce;
         // Signer wallet address
         address signerWallet;
+        // Buyer address
+        address buyer;
         // Amount of biddingToken offered by signer
         uint256 sellAmount;
         // Amount of oToken requested by signer
@@ -66,7 +68,7 @@ interface ISwap {
     event Swap(
         uint256 indexed swapId,
         uint256 nonce,
-        address indexed signerWallet,
+        address indexed buyer,
         uint256 signerAmount,
         uint256 sellerAmount,
         address referrer,

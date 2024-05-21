@@ -48,6 +48,7 @@ contract Swap is
                 "uint256 swapId,",
                 "uint256 nonce,",
                 "address signerWallet,",
+                "address buyer,",
                 "uint256 sellAmount,",
                 "uint256 buyAmount,",
                 "address referrer",
@@ -338,22 +339,22 @@ contract Swap is
             errCount++;
         }
 
-        // Check signer allowance
-        uint256 signerAllowance =
+        // Check buyer allowance
+        uint256 buyerAllowance =
             IERC20(offer.biddingToken).allowance(
-                bid.signerWallet,
+                bid.buyer,
                 address(this)
             );
-        if (signerAllowance < bid.sellAmount) {
-            errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+        if (buyerAllowance < bid.sellAmount) {
+            errors[errCount] = "BUYER_ALLOWANCE_LOW";
             errCount++;
         }
 
-        // Check signer balance
-        uint256 signerBalance =
-            IERC20(offer.biddingToken).balanceOf(bid.signerWallet);
-        if (signerBalance < bid.sellAmount) {
-            errors[errCount] = "SIGNER_BALANCE_LOW";
+        // Check buyer balance
+        uint256 buyerBalance =
+            IERC20(offer.biddingToken).balanceOf(bid.buyer);
+        if (buyerBalance < bid.sellAmount) {
+            errors[errCount] = "BUYER_BALANCE_LOW";
             errCount++;
         }
 
@@ -443,7 +444,7 @@ contract Swap is
         // Transfer token from sender to signer
         IERC20(details.oToken).safeTransferFrom(
             details.seller,
-            bid.signerWallet,
+            bid.buyer,
             bid.buyAmount
         );
 
@@ -461,7 +462,7 @@ contract Swap is
                 );
 
                 IERC20(details.biddingToken).safeTransferFrom(
-                    bid.signerWallet,
+                    bid.buyer,
                     bid.referrer,
                     feeAmount
                 );
@@ -470,7 +471,7 @@ contract Swap is
 
         // Transfer token from signer to recipient
         IERC20(details.biddingToken).safeTransferFrom(
-            bid.signerWallet,
+            bid.buyer,
             details.seller,
             bid.sellAmount - feeAmount
         );
@@ -479,7 +480,7 @@ contract Swap is
         emit Swap(
             bid.swapId,
             bid.nonce,
-            bid.signerWallet,
+            bid.buyer,
             bid.sellAmount,
             bid.buyAmount,
             bid.referrer,
@@ -528,6 +529,7 @@ contract Swap is
                                 bid.swapId,
                                 bid.nonce,
                                 bid.signerWallet,
+                                bid.buyer,
                                 bid.sellAmount,
                                 bid.buyAmount,
                                 bid.referrer
