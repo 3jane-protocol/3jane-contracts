@@ -36,6 +36,8 @@ interface ISwap {
         uint256 nonce;
         // Signer wallet address
         address signerWallet;
+        // Recipient wallet address
+        address recipientWallet;
         // Amount of biddingToken offered by signer
         uint256 sellAmount;
         // Amount of oToken requested by signer
