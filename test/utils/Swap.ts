@@ -43,6 +43,7 @@ describe("Swap", () => {
       { name: "swapId", type: "uint256" },
       { name: "nonce", type: "uint256" },
       { name: "signerWallet", type: "address" },
+      { name: "buyer", type: "address" },
       { name: "sellAmount", type: "uint256" },
       { name: "buyAmount", type: "uint256" },
       { name: "referrer", type: "address" },
@@ -77,7 +78,7 @@ describe("Swap", () => {
         {
           forking: {
             jsonRpcUrl: TEST_URI[chainId],
-            blockNumber: BLOCK_NUMBER[chainId],
+            blockNumber: 11448950, //BLOCK_NUMBER[chainId],
           },
         },
       ],
@@ -127,7 +128,7 @@ describe("Swap", () => {
       usdcOwner, // token owner
       user, // recipient
       swap.address, // spender
-      parseUnits("10000000", 6) // amount
+      parseUnits("1000000", 6) // amount
     );
 
     await usdcContract
@@ -139,12 +140,12 @@ describe("Swap", () => {
       usdcOwner, // token owner
       owner, // recipient
       swap.address, // spender
-      parseUnits("10000000", 6) // amount
+      parseUnits("1000000", 6) // amount
     );
 
     await usdcContract
       .connect(ownerSigner)
-      .approve(swap.address, parseUnits("10000000", 6));
+      .approve(swap.address, parseUnits("1000000", 6));
 
     // MINT WETH FOR KEEPER AND GIVE ALLOWANCE TO SWAP CONTRACT
     wethAddress = WETH_ADDRESS[chainId];
@@ -368,6 +369,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -379,6 +381,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          keeper,
           keeper,
           sellAmount,
           buyAmount,
@@ -404,6 +407,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -415,6 +419,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          keeper,
           keeper,
           sellAmount,
           buyAmount,
@@ -440,6 +445,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -451,6 +457,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -479,6 +486,7 @@ describe("Swap", () => {
           swapId,
           nonce,
           keeper,
+          keeper,
           sellAmount,
           buyAmount,
           referrer,
@@ -503,6 +511,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -514,6 +523,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          keeper,
           keeper,
           sellAmount,
           buyAmount,
@@ -539,6 +549,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -550,6 +561,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -575,6 +587,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -586,6 +599,7 @@ describe("Swap", () => {
           swapId,
           nonce,
           user,
+          user,
           sellAmount,
           buyAmount,
           referrer,
@@ -596,6 +610,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -624,6 +639,7 @@ describe("Swap", () => {
           swapId,
           nonce,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount,
           buyAmount,
           referrer,
@@ -634,6 +650,7 @@ describe("Swap", () => {
         bids.push([
           swapId,
           nonce,
+          userSigner.address,
           userSigner.address,
           sellAmount,
           buyAmount,
@@ -660,6 +677,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -671,6 +689,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -698,6 +717,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -709,6 +729,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -739,6 +760,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -750,6 +772,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -794,6 +817,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -805,6 +829,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -839,6 +864,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -850,6 +876,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -911,6 +938,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -922,6 +950,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -950,6 +979,7 @@ describe("Swap", () => {
           swapId,
           nonce,
           signerWallet: user,
+          buyer: user,
           sellAmount,
           buyAmount,
           referrer,
@@ -960,6 +990,7 @@ describe("Swap", () => {
         bids.push([
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -1136,6 +1167,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1147,6 +1179,7 @@ describe("Swap", () => {
         swap.check([
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -1169,6 +1202,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1179,6 +1213,7 @@ describe("Swap", () => {
       const error = await swap.check([
         swapId,
         nonce,
+        user,
         user,
         sellAmount,
         buyAmount,
@@ -1202,6 +1237,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1212,6 +1248,7 @@ describe("Swap", () => {
       const error = await swap.check([
         swapId,
         nonce,
+        user,
         user,
         sellAmount,
         buyAmount,
@@ -1237,6 +1274,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1247,6 +1285,7 @@ describe("Swap", () => {
       const error = await swap.check([
         swapId,
         nonce,
+        user,
         user,
         sellAmount,
         buyAmount,
@@ -1304,6 +1343,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1315,6 +1355,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
@@ -1342,6 +1383,7 @@ describe("Swap", () => {
         swapId,
         nonce,
         signerWallet: user,
+        buyer: user,
         sellAmount,
         buyAmount,
         referrer,
@@ -1353,6 +1395,7 @@ describe("Swap", () => {
         [
           swapId,
           nonce,
+          user,
           user,
           sellAmount,
           buyAmount,
