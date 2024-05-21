@@ -462,7 +462,7 @@ contract Swap is
                 );
 
                 IERC20(details.biddingToken).safeTransferFrom(
-                    bid.signerWallet,
+                    bid.buyer,
                     bid.referrer,
                     feeAmount
                 );
@@ -480,7 +480,7 @@ contract Swap is
         emit Swap(
             bid.swapId,
             bid.nonce,
-            bid.signerWallet,
+            bid.buyer,
             bid.sellAmount,
             bid.buyAmount,
             bid.referrer,
