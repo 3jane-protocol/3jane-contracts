@@ -890,28 +890,6 @@ export async function generateWallet(
   return signer;
 }
 
-export async function mintToken(
-  contract: Contract,
-  contractOwner: string,
-  spender: string,
-  amount: BigNumberish
-) {
-  const tokenOwnerSigner = await ethers.provider.getSigner(contractOwner);
-
-  await network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [contractOwner],
-  });
-
-  await contract.connect(tokenOwnerSigner).transfer(spender, amount);
-
-  await network.provider.request({
-    method: "hardhat_stopImpersonatingAccount",
-    params: [contractOwner],
-  });
-}
-
-
 export async function approve(
   contract: Contract,
   approver: string,
