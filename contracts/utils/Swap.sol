@@ -308,8 +308,8 @@ contract Swap is
         }
 
         if (
-            bid.signerWallet != signatory &&
-            authorized[bid.signerWallet] != signatory
+            bid.buyer != signatory &&
+            authorized[bid.buyer] != signatory
         ) {
             errors[errCount] = "UNAUTHORIZED";
             errCount++;
