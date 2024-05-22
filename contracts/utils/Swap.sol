@@ -421,8 +421,8 @@ contract Swap is
 
         require(signatory != address(0), "SIGNATURE_INVALID");
 
-        if (bid.signerWallet != signatory) {
-            require(authorized[bid.signerWallet] == signatory, "UNAUTHORIZED");
+        if (bid.buyer != signatory) {
+            require(authorized[bid.buyer] == signatory, "UNAUTHORIZED");
         }
 
         require(_markNonceAsUsed(signatory, bid.nonce), "NONCE_ALREADY_USED");
