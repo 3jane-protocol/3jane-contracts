@@ -9,6 +9,9 @@ import {
 
 import {ISwap} from "../../interfaces/ISwap.sol";
 import {
+    IOtoken
+} from "../../interfaces/GammaInterface.sol";
+import {
     RibbonThetaVaultStorage
 } from "../../storage/RibbonThetaVaultStorage.sol";
 import {Vault} from "../../libraries/Vault.sol";
@@ -301,6 +304,10 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
             "Overflow nextOptionReady"
         );
         optionState.nextOptionReadyAt = uint32(nextOptionReady);
+
+        for (uint256 i = 0; i < settledBids.length; i++) {
+          delete settledBids[i];
+        }
     }
 
     /**
@@ -401,16 +408,27 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
         onlyKeeper
         nonReentrant
     {
+        for (uint256 i = 0; i < bids.length; i++) {
+          settledBids.push(bids[i]);
+        }
+
         ISwap(SWAP_CONTRACT).settleOffer(optionAuctionID, bids);
     }
 
     /**
-     * @notice Burn the remaining oTokens left over
+     * @notice Burn the remaining oTokens left over and return premiums
      */
     function burnRemainingOTokens() external onlyKeeper nonReentrant {
-        VaultLifecycleWithSwap.burnOtokens(
-            GAMMA_CONTROLLER,
-            optionState.currentOption
-        );
+      uint256 diff = IOtoken(optionState.currentOption).expiryTimestamp() - (block.timestamp - (block.timestamp % (24 hours)) + (8 hours));
+
+      for (uint256 i = 0; i < settledBids.length; i++) {
+        ISwap.Bid memory bid = settledBids[i];
+        transferAsset(bid.buyer, bid.sellAmount.mul(diff).div(period));
+      }
+
+      VaultLifecycleWithSwap.burnOtokens(
+          GAMMA_CONTROLLER,
+          optionState.currentOption
+      );
     }
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
+import {ISwap} from "../interfaces/ISwap.sol";
+
 abstract contract RibbonThetaVaultStorageV1 {
     // Logic contract used to price options
     address public optionsPremiumPricer;
@@ -21,6 +23,9 @@ abstract contract RibbonThetaVaultStorageV1 {
     address public optionsPurchaseQueue;
     // Queued withdraw shares for the current round
     uint256 public currentQueuedWithdrawShares;
+
+    // Settled bids from previous round
+    ISwap.Bid[] internal settledBids;
 }
 
 // We are following Compound's method of upgrading new contract implementations
