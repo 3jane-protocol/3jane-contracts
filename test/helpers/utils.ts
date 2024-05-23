@@ -515,6 +515,7 @@ export interface Bid {
   swapId: number;
   nonce: number;
   signerWallet: string;
+  buyer: string;
   sellAmount: BigNumberish;
   buyAmount: BigNumberish;
   referrer: string;
@@ -527,7 +528,7 @@ export async function generateSignedBid(
   bid: Bid
 ) {
   const domain = {
-    name: "RIBBON SWAP", // This is set as a constant in the swap contract
+    name: "3JANE SWAP", // This is set as a constant in the swap contract
     version: "1", // This is set as a constant in the swap contract
     chainId,
     verifyingContract: swapContractAddress,
@@ -538,6 +539,7 @@ export async function generateSignedBid(
       { name: "swapId", type: "uint256" },
       { name: "nonce", type: "uint256" },
       { name: "signerWallet", type: "address" },
+      { name: "buyer", type: "address" },
       { name: "sellAmount", type: "uint256" },
       { name: "buyAmount", type: "uint256" },
       { name: "referrer", type: "address" },

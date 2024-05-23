@@ -357,7 +357,7 @@ function behavesLikeRibbonOptionsVault(params: {
       );
       vaultLifecycleLib = await VaultLifecycle.deploy();
 
-      const domainName = "RIBBON SWAP";
+      const domainName = "3JANE SWAP";
       const domainVersion = "1";
       const swapInitializeArgs = [domainName, domainVersion, owner];
 
@@ -1304,6 +1304,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1401,6 +1402,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1595,6 +1597,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1654,6 +1657,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -2059,6 +2063,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -2232,6 +2237,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
