@@ -21,8 +21,6 @@ import {
 import {ShareMath} from "../../libraries/ShareMath.sol";
 import {RibbonVault} from "./base/RibbonVault.sol";
 
-import "hardhat/console.sol";
-
 /**
  * UPGRADEABILITY: Since we use the upgradeable proxy pattern, we must observe
  * the inheritance chain closely.
