@@ -8,6 +8,7 @@ import moment from "moment-timezone";
 import * as time from "./helpers/time";
 import {
   CHAINLINK_WETH_PRICER,
+  CHAINLINK_WBTC_PRICER,
   CHAINID,
   OPTION_PROTOCOL,
   USDC_PRICE_ORACLE,
@@ -1139,6 +1140,7 @@ function behavesLikeRibbonOptionsVault(params: {
         const { round2, amount2 } = await vault.depositReceipts(user);
         await expect(round2).to.be.undefined;
         await expect(amount2).to.be.undefined;
+        assert.bnEqual(await amplol.balanceOf(creditor), depositAmount);
       });
 
       it("tops up existing deposit", async function () {
@@ -2711,6 +2713,8 @@ function behavesLikeRibbonOptionsVault(params: {
           startBalance = await assetContract.balanceOf(user);
         }
 
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount);
+
         const tx = await vault.withdrawInstantly(depositAmount, { gasPrice });
         const receipt = await tx.wait();
 
@@ -2732,7 +2736,7 @@ function behavesLikeRibbonOptionsVault(params: {
         const { round, amount } = await vault.depositReceipts(user);
         assert.equal(round, 1);
         assert.bnEqual(amount, BigNumber.from(0));
-
+        assert.bnEqual(await amplol.balanceOf(user), BigNumber.from(0));
         // Should decrement the pending amounts
         assert.bnEqual(await vault.totalPending(), BigNumber.from(0));
       });
@@ -2995,6 +2999,8 @@ function behavesLikeRibbonOptionsVault(params: {
         const { queuedWithdrawShares: startQueuedShares } =
           await vault.vaultState();
 
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount);
+
         const tx = await vault.completeWithdraw({ gasPrice });
         const receipt = await tx.wait();
         const gasFee = receipt.gasUsed.mul(gasPrice);
@@ -3036,6 +3042,8 @@ function behavesLikeRibbonOptionsVault(params: {
           const afterBalance = await assetContract.balanceOf(user);
           actualWithdrawAmount = afterBalance.sub(beforeBalance);
         }
+
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount.sub(withdrawAmount));
         // Should be less because the pps is down
         assert.bnLt(actualWithdrawAmount, depositAmount);
         assert.bnEqual(actualWithdrawAmount, withdrawAmount);

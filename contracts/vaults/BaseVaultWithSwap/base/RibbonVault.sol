@@ -470,9 +470,9 @@ contract RibbonVault is
         _burn(address(this), withdrawalShares);
 
         require(withdrawAmount > 0, "!withdrawAmount");
-        transferAsset(msg.sender, withdrawAmount);
 
-        AMPLOL.mint(msg.sender, withdrawAmount);
+        AMPLOL.burn(msg.sender, withdrawAmount);
+        transferAsset(msg.sender, withdrawAmount);
 
         return withdrawAmount;
     }

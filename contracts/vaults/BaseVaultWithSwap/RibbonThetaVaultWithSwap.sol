@@ -238,6 +238,7 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
 
         emit InstantWithdraw(msg.sender, amount, currentRound);
 
+        AMPLOL.burn(msg.sender, amount);
         transferAsset(msg.sender, amount);
     }
 
