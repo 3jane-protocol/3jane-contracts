@@ -1437,7 +1437,7 @@ function behavesLikeRibbonOptionsVault(params: {
           .closeRound({ from: owner });
 
         const receipt = await res.wait();
-        assert.isAtMost(receipt.gasUsed.toNumber(), 140500);
+        assert.isAtMost(receipt.gasUsed.toNumber(), 142377);
         // console.log("closeRound", receipt.gasUsed.toNumber());
       });
     });
@@ -1715,7 +1715,7 @@ function behavesLikeRibbonOptionsVault(params: {
           parseInt(assetBalanceAfterBurn.toString()),
           parseInt(
             assetBalanceAfterSettle
-              .add(lockedAmountBeforeBurn.div(bidMultiplier))
+              .add(lockedAmountBeforeBurn.div(bidMultiplier)).sub(sellAmount)
               .toString()
           )
         );

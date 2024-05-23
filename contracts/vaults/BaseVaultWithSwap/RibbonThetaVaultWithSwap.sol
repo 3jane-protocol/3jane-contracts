@@ -21,6 +21,8 @@ import {
 import {ShareMath} from "../../libraries/ShareMath.sol";
 import {RibbonVault} from "./base/RibbonVault.sol";
 
+import "hardhat/console.sol";
+
 /**
  * UPGRADEABILITY: Since we use the upgradeable proxy pattern, we must observe
  * the inheritance chain closely.
@@ -427,7 +429,10 @@ contract RibbonThetaVaultWithSwap is RibbonVault, RibbonThetaVaultStorage {
 
       for (uint256 i = 0; i < settledBids.length; i++) {
         ISwap.Bid memory bid = settledBids[i];
-        transferAsset(bid.buyer, bid.sellAmount.mul(diff).div(period));
+        uint256 unearnedPremiums = bid.sellAmount.mul(diff).div(period * 1 days);
+        if(unearnedPremiums > 0){
+          transferAsset(bid.buyer, unearnedPremiums);
+        }
       }
 
       VaultLifecycleWithSwap.burnOtokens(
