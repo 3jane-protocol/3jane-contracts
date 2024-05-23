@@ -36,6 +36,7 @@ import {
   CHAINLINK_WETH_PRICER,
   UNI_ADDRESS,
   WETH_ADDRESS,
+  WEETH_ADDRESS,
   ETH_PRICE_ORACLE,
   UNI_PRICE_ORACLE,
   BTC_PRICE_ORACLE,
@@ -120,8 +121,10 @@ export async function getBlockNum(asset: string, chainId: number) {
     return 16000050;
   } else if (asset === BADGER_ADDRESS[chainId]) {
     return 15012740;
-  } else {
+  } else if (asset === WBTC_ADDRESS[chainId]){
     return 15012740;
+  } else {
+    return 19672061;
   }
 }
 
@@ -458,6 +461,7 @@ export async function mintToken(
   spender: string,
   amount: BigNumberish
 ) {
+
   const tokenOwnerSigner = await ethers.provider.getSigner(contractOwner);
 
   await network.provider.request({
@@ -486,7 +490,8 @@ export async function mintToken(
     contract.address === BAL_ADDRESS[chainId] ||
     contract.address === SPELL_ADDRESS[chainId] ||
     contract.address === RETH_ADDRESS[chainId] ||
-    contract.address === UNI_ADDRESS[chainId]
+    contract.address === UNI_ADDRESS[chainId] ||
+    contract.address === WEETH_ADDRESS
   ) {
     await contract.connect(tokenOwnerSigner).transfer(recipient, amount);
   } else {
@@ -510,6 +515,7 @@ export interface Bid {
   swapId: number;
   nonce: number;
   signerWallet: string;
+  buyer: string;
   sellAmount: BigNumberish;
   buyAmount: BigNumberish;
   referrer: string;
@@ -522,7 +528,7 @@ export async function generateSignedBid(
   bid: Bid
 ) {
   const domain = {
-    name: "RIBBON SWAP", // This is set as a constant in the swap contract
+    name: "3JANE SWAP", // This is set as a constant in the swap contract
     version: "1", // This is set as a constant in the swap contract
     chainId,
     verifyingContract: swapContractAddress,
@@ -533,6 +539,7 @@ export async function generateSignedBid(
       { name: "swapId", type: "uint256" },
       { name: "nonce", type: "uint256" },
       { name: "signerWallet", type: "address" },
+      { name: "buyer", type: "address" },
       { name: "sellAmount", type: "uint256" },
       { name: "buyAmount", type: "uint256" },
       { name: "referrer", type: "address" },
@@ -905,8 +912,6 @@ export async function approve(
 
   await contract.connect(tokenOwnerSigner).approve(spender, amount);
 
-  console.log("allowance");
-  console.log((await contract.allowance(approver, spender)).toString());
   await network.provider.request({
     method: "hardhat_stopImpersonatingAccount",
     params: [approver],

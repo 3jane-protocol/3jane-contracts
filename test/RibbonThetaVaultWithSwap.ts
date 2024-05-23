@@ -7,6 +7,7 @@ import OptionsPremiumPricerInStables_ABI from "../constants/abis/OptionsPremiumP
 import moment from "moment-timezone";
 import * as time from "./helpers/time";
 import {
+  CHAINLINK_WETH_PRICER,
   CHAINLINK_WBTC_PRICER,
   CHAINID,
   OPTION_PROTOCOL,
@@ -14,6 +15,8 @@ import {
   USDC_ADDRESS,
   WBTC_ADDRESS,
   WBTC_OWNER_ADDRESS,
+  WEETH_ADDRESS,
+  WEETH_OWNER_ADDRESS,
   WETH_ADDRESS,
   ManualVolOracle_BYTECODE,
   OptionsPremiumPricerInStables_BYTECODE,
@@ -71,8 +74,8 @@ describe("RibbonThetaVaultWithSwap", () => {
     expectedMintAmount: BigNumber.from("100000000"),
     isPut: false,
     gasLimits: {
-      depositWorstCase: 101510,
-      depositBestCase: 90000,
+      depositWorstCase: 141510,
+      depositBestCase: 110000,
     },
     mintConfig: {
       amount: parseEther("200"),
@@ -81,6 +84,38 @@ describe("RibbonThetaVaultWithSwap", () => {
     availableChains: [CHAINID.ETH_MAINNET],
     protocol: OPTION_PROTOCOL.GAMMA,
   });
+
+  /*behavesLikeRibbonOptionsVault({
+    name: `Ribbon WEETH Theta Vault (Call)`,
+    tokenName: "Ribbon EETHG Theta Vault",
+    tokenSymbol: "rWEETH-THETA",
+    asset: WEETH_ADDRESS,
+    assetContractName: "IWEETH",
+    strikeAsset: USDC_ADDRESS[chainId],
+    collateralAsset: WEETH_ADDRESS,
+    chainlinkPricer: CHAINLINK_WETH_PRICER[chainId],
+    deltaFirstOption: BigNumber.from("1000"),
+    deltaSecondOption: BigNumber.from("1000"),
+    deltaStep: getDeltaStep("WETH"),
+    tokenDecimals: 18,
+    depositAmount: parseEther("1"),
+    period: 7,
+    managementFee: BigNumber.from("2000000"),
+    performanceFee: BigNumber.from("20000000"),
+    minimumSupply: BigNumber.from("10").pow("3").toString(),
+    expectedMintAmount: BigNumber.from("100000000"),
+    isPut: false,
+    gasLimits: {
+      depositWorstCase: 141510,
+      depositBestCase: 110000,
+    },
+    mintConfig: {
+      amount: parseEther("20"),
+      contractOwnerAddress: WEETH_OWNER_ADDRESS[chainId],
+    },
+    availableChains: [CHAINID.ETH_MAINNET],
+    protocol: OPTION_PROTOCOL.GAMMA,
+  });*/
 });
 
 type Option = {
@@ -192,6 +227,7 @@ function behavesLikeRibbonOptionsVault(params: {
   let oTokenFactory: Contract;
   let defaultOtoken: Contract;
   let assetContract: Contract;
+  let amplol: Contract;
 
   // Variables
   let defaultOtokenAddress: string;
@@ -321,13 +357,17 @@ function behavesLikeRibbonOptionsVault(params: {
       );
       vaultLifecycleLib = await VaultLifecycle.deploy();
 
-      const domainName = "RIBBON SWAP";
+      const domainName = "3JANE SWAP";
       const domainVersion = "1";
       const swapInitializeArgs = [domainName, domainVersion, owner];
 
       swapContract = (
         await deployProxy("Swap", adminSigner, swapInitializeArgs)
       ).connect(ownerSigner);
+
+      const MockERC20 = await getContractFactory("MockERC20", ownerSigner);
+
+      amplol = await MockERC20.deploy("AMPLOL", "AMPLOL");
 
       const initializeArgs = [
         [
@@ -357,6 +397,7 @@ function behavesLikeRibbonOptionsVault(params: {
         GAMMA_CONTROLLER,
         MARGIN_POOL,
         swapContract.address,
+        amplol.address,
       ];
 
       vault = (
@@ -495,7 +536,8 @@ function behavesLikeRibbonOptionsVault(params: {
           OTOKEN_FACTORY,
           GAMMA_CONTROLLER,
           MARGIN_POOL,
-          swapContract.address
+          swapContract.address,
+          amplol.address
         );
       });
 
@@ -1098,6 +1140,7 @@ function behavesLikeRibbonOptionsVault(params: {
         const { round2, amount2 } = await vault.depositReceipts(user);
         await expect(round2).to.be.undefined;
         await expect(amount2).to.be.undefined;
+        assert.bnEqual(await amplol.balanceOf(creditor), depositAmount);
       });
 
       it("tops up existing deposit", async function () {
@@ -1261,6 +1304,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1358,6 +1402,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1552,6 +1597,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -1611,6 +1657,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -2016,6 +2063,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -2189,6 +2237,7 @@ function behavesLikeRibbonOptionsVault(params: {
           swapId: offerId.toString(),
           nonce: 1,
           signerWallet: userSigner.address,
+          buyer: userSigner.address,
           sellAmount: sellAmount.toString(), // > than the minimumPrice
           buyAmount: buyAmount.toString(), // > than minimumBid
           referrer: constants.AddressZero,
@@ -2670,6 +2719,8 @@ function behavesLikeRibbonOptionsVault(params: {
           startBalance = await assetContract.balanceOf(user);
         }
 
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount);
+
         const tx = await vault.withdrawInstantly(depositAmount, { gasPrice });
         const receipt = await tx.wait();
 
@@ -2691,7 +2742,7 @@ function behavesLikeRibbonOptionsVault(params: {
         const { round, amount } = await vault.depositReceipts(user);
         assert.equal(round, 1);
         assert.bnEqual(amount, BigNumber.from(0));
-
+        assert.bnEqual(await amplol.balanceOf(user), BigNumber.from(0));
         // Should decrement the pending amounts
         assert.bnEqual(await vault.totalPending(), BigNumber.from(0));
       });
@@ -2954,6 +3005,8 @@ function behavesLikeRibbonOptionsVault(params: {
         const { queuedWithdrawShares: startQueuedShares } =
           await vault.vaultState();
 
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount);
+
         const tx = await vault.completeWithdraw({ gasPrice });
         const receipt = await tx.wait();
         const gasFee = receipt.gasUsed.mul(gasPrice);
@@ -2995,6 +3048,8 @@ function behavesLikeRibbonOptionsVault(params: {
           const afterBalance = await assetContract.balanceOf(user);
           actualWithdrawAmount = afterBalance.sub(beforeBalance);
         }
+
+        assert.bnEqual(await amplol.balanceOf(user), depositAmount.sub(withdrawAmount));
         // Should be less because the pps is down
         assert.bnLt(actualWithdrawAmount, depositAmount);
         assert.bnEqual(actualWithdrawAmount, withdrawAmount);
