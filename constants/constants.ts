@@ -489,6 +489,10 @@ export const EETH_OWNER_ADDRESS = {
   [CHAINID.ETH_MAINNET]: "0x7a95f1554eA2E36ED297b70E70C8B45a33b53095",
 };
 
+export const WEETH_OWNER_ADDRESS = {
+  [CHAINID.ETH_MAINNET]: "0xAC0047886a985071476a1186bE89222659970d65",
+};
+
 export const DAI_OWNER_ADDRESS = {
   [CHAINID.ETH_MAINNET]: "0xe5F8086DAc91E039b1400febF0aB33ba3487F29A",
 };
@@ -541,6 +545,8 @@ export const AB = 10000; // autocall is 100%
 export const CB = 0; // FIXED requires 0 CB
 export const OBSERVATION_FREQUENCY = 604800; // 7 days
 export const AUTOCALL_SELLER = ""; // Marex address
+
+export const AMPLOL = "0x0000000000000000000000000000000000000000";
 
 /**
  * RVol Bytecode

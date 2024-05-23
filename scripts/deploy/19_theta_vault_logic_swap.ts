@@ -4,6 +4,7 @@ import {
   OTOKEN_FACTORY,
   MARGIN_POOL,
   GAMMA_CONTROLLER,
+  AMPLOL,
 } from "../../constants/constants";
 
 const main = async ({
@@ -13,6 +14,7 @@ const main = async ({
 }: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
+
   console.log(`18 - Deploying Theta Vault with Swap logic on ${network.name}`);
 
   const chainId = network.config.chainId;
@@ -32,6 +34,7 @@ const main = async ({
       GAMMA_CONTROLLER[chainId],
       MARGIN_POOL[chainId],
       swapAddress,
+      AMPLOL,
     ],
     libraries: {
       VaultLifecycleWithSwap: lifecycle.address,
@@ -57,6 +60,7 @@ const main = async ({
         GAMMA_CONTROLLER[chainId],
         MARGIN_POOL[chainId],
         swapAddress,
+        AMPLOL,
       ],
     });
   } catch (error) {
@@ -64,6 +68,6 @@ const main = async ({
   }
 };
 main.tags = ["RibbonThetaVaultWithSwapLogic"];
-main.dependencies = ["Swap"];
+main.dependencies = [];
 
 export default main;
