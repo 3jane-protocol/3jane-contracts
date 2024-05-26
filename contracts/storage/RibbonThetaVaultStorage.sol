@@ -23,9 +23,6 @@ abstract contract RibbonThetaVaultStorageV1 {
     address public optionsPurchaseQueue;
     // Queued withdraw shares for the current round
     uint256 public currentQueuedWithdrawShares;
-
-    // Settled bids from previous round
-    ISwap.Bid[] internal settledBids;
 }
 
 abstract contract RibbonThetaVaultStorageV2 {
