@@ -28,10 +28,15 @@ abstract contract RibbonThetaVaultStorageV1 {
     ISwap.Bid[] internal settledBids;
 }
 
+abstract contract RibbonThetaVaultStorageV2 {
+    // Settled bids from previous round
+    ISwap.Bid[] internal settledBids;
+}
+
 // We are following Compound's method of upgrading new contract implementations
 // When we need to add new storage variables, we create a new version of RibbonThetaVaultStorage
 // e.g. RibbonThetaVaultStorage<versionNumber>, so finally it would look like
-// contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1
-abstract contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1 {
+// contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1, RibbonThetaVaultStorageV2
+abstract contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1, RibbonThetaVaultStorageV2 {
 
 }
