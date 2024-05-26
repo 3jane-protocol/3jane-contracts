@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
+import {ISwap} from "../interfaces/ISwap.sol";
+
 abstract contract RibbonThetaVaultStorageV1 {
     // Logic contract used to price options
     address public optionsPremiumPricer;
@@ -23,10 +25,15 @@ abstract contract RibbonThetaVaultStorageV1 {
     uint256 public currentQueuedWithdrawShares;
 }
 
+abstract contract RibbonThetaVaultStorageV2 {
+    // Settled bids from previous round
+    ISwap.Bid[] internal settledBids;
+}
+
 // We are following Compound's method of upgrading new contract implementations
 // When we need to add new storage variables, we create a new version of RibbonThetaVaultStorage
 // e.g. RibbonThetaVaultStorage<versionNumber>, so finally it would look like
-// contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1
-abstract contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1 {
+// contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1, RibbonThetaVaultStorageV2
+abstract contract RibbonThetaVaultStorage is RibbonThetaVaultStorageV1, RibbonThetaVaultStorageV2 {
 
 }
