@@ -301,6 +301,8 @@ contract RibbonVault is
             address(this),
             amount
         );
+
+        AMPLOL.mint(msg.sender, amount);
     }
 
     /**
@@ -324,6 +326,8 @@ contract RibbonVault is
             address(this),
             amount
         );
+
+        AMPLOL.mint(creditor, amount);
     }
 
     /**
@@ -393,7 +397,6 @@ contract RibbonVault is
         ShareMath.assertUint128(newTotalPending);
 
         vaultState.totalPending = uint128(newTotalPending);
-        AMPLOL.mint(creditor, amount);
     }
 
     /**
