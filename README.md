@@ -1,13 +1,10 @@
 # 3Jane
 
-Ribbon v2 is the next version for Ribbon's Theta Vault product. It brings several major improvements to the vault and makes the vault operations decentralized.
+3Jane is a crypto-native derivatives protocol leveraging restaking and cash-and-carry to unlock a novel derivatives yield source. 3Jane enables the collateralization of shared security of any Proof-of-Stake system in financial derivatives contracts, allowing users to generate real ETH / BTC yield on EigenLayer and Babylon.
 
-v2 changes include:
+Users can wrap natively restaked ETH, restaked LST's, eETH, ezETH, sUSDe, and sDAI on 3Jane & earn additional options premiums yield. Under the hood, 3Jane vaults sell deep Out-of-the-Money options & accrue premiums to wrapped deposits.
 
-- Decentralization of Theta Vault operations
-- Improved capital efficiency (100% of vault funds are utilized)
-- No more withdrawal fees, switching to performance fee
-- Meta-Vault strategies by composing multiple Theta Vaults
+3Jane contracts are a fork of Ribbon Finance V2 vaults with enhancements.
 
 ## Getting Started
 
